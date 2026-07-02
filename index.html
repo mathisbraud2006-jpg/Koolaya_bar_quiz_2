@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koolaya Bar Quiz 🎤</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d1a;--surface:#1a1a30;--surface2:#22224a;--text:#f5f5ff;--muted:#9090bb}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:flex-start;justify-content:center}
+.app{width:100%;max-width:980px;padding:20px}
+.screen{display:none}.screen.active{display:block}
+.title-font{font-family:'Bebas Neue',sans-serif;letter-spacing:3px}
+#s-setup{text-align:center;padding:30px 20px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:4.5rem;line-height:1;letter-spacing:6px;background:linear-gradient(135deg,#ff6b6b,#fd79a8,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.logo-sub{font-size:.9rem;color:var(--muted);margin-bottom:1.8rem;letter-spacing:4px;text-transform:uppercase}
+.setup-cols{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem}
+.teams-section,.setup-options{background:var(--surface);border-radius:20px;padding:24px;width:340px;flex-shrink:0;text-align:left}
+.teams-section h3,.setup-options h3{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:3px;margin-bottom:1.2rem;text-align:center}
+.team-input-row{display:flex;gap:8px;margin-bottom:.8rem}
+.team-input-row input{flex:1;background:var(--surface2);border:2px solid #3333aa;border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s}
+.team-input-row input:focus{border-color:#a29bfe}
+.team-input-row input::placeholder{color:var(--muted)}
+.btn-add{background:#a29bfe;border:none;border-radius:12px;padding:10px 18px;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;cursor:pointer;transition:transform .1s,background .2s}
+.btn-add:hover{background:#6c5ce7;transform:scale(1.05)}
+.teams-list{list-style:none}
+.team-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:9px 12px;margin-bottom:7px}
+.team-dot{width:10px;height:10px;border-radius:50%;margin-right:9px;display:inline-block}
+.team-item-left{display:flex;align-items:center}
+.team-item .team-name{font-weight:700;font-size:.9rem}
+.btn-remove{background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:6px}
+.btn-remove:hover{background:rgba(255,107,107,.2)}
+.team-count-hint{font-size:.75rem;color:var(--muted);margin-bottom:.8rem}
+.setup-options{width:380px}
+.opt-row{margin-bottom:1.1rem}
+.opt-label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:.5rem}
+.diff-pills{display:flex;gap:7px;flex-wrap:wrap}
+.diff-pill{background:var(--surface2);border:2px solid transparent;border-radius:50px;padding:6px 15px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.diff-pill.active{border-color:#a29bfe;color:#a29bfe;background:rgba(162,155,254,.15)}
+.diff-pill:hover:not(.active){border-color:rgba(255,255,255,.2);color:var(--text)}
+.cats-select-row{display:flex;gap:8px;margin-bottom:7px}
+.cats-select-all{background:none;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:3px 11px;color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .2s}
+.cats-select-all:hover{color:var(--text);border-color:rgba(255,255,255,.4)}
+.cats-checkboxes{display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow-y:auto;padding-right:4px}
+.cats-checkboxes::-webkit-scrollbar{width:4px}
+.cats-checkboxes::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
+.cats-checkboxes::-webkit-scrollbar-thumb{background:#3333aa;border-radius:4px}
+.cat-check{background:var(--surface2);border:2px solid transparent;border-radius:8px;padding:5px 11px;color:var(--muted);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:5px;user-select:none}
+.cat-check.selected{color:white}
+.qcm-toggle{display:flex;align-items:center;gap:10px}
+.toggle-switch{position:relative;width:42px;height:22px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface2);border-radius:24px;cursor:pointer;transition:.2s;border:2px solid rgba(255,255,255,.1)}
+.toggle-slider::before{content:'';position:absolute;height:14px;width:14px;left:2px;bottom:2px;background:var(--muted);border-radius:50%;transition:.2s}
+input:checked+.toggle-slider{background:rgba(162,155,254,.3);border-color:#a29bfe}
+input:checked+.toggle-slider::before{transform:translateX(20px);background:#a29bfe}
+.btn-start{background:linear-gradient(135deg,#ff6b6b,#fd79a8);border:none;border-radius:16px;padding:16px 56px;color:white;font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;cursor:pointer;transition:transform .1s,box-shadow .2s;box-shadow:0 8px 30px rgba(255,107,107,.4)}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(255,107,107,.6)}
+.btn-start:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.setup-hint{margin-top:10px;font-size:.8rem;color:var(--muted)}
+#s-cats{padding:16px 0}
+.scoreboard{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.score-pill{background:var(--surface);border-radius:50px;padding:7px 16px;display:flex;align-items:center;gap:8px}
+.score-pill .s-dot{width:8px;height:8px;border-radius:50%}
+.score-pill .s-name{font-weight:700;font-size:.85rem}
+.score-pill .s-score{background:var(--surface2);border-radius:20px;padding:2px 10px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;min-width:32px;text-align:center}
+.section-title{text-align:center;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:3px;margin-bottom:14px}
+.categories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;margin-bottom:18px}
+.cat-btn{border:none;border-radius:16px;padding:20px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:transform .15s,opacity .2s;position:relative;overflow:hidden}
+.cat-btn:hover:not(:disabled){transform:translateY(-5px) scale(1.02)}
+.cat-btn:active:not(:disabled){transform:scale(.97)}
+.cat-btn:disabled{opacity:.3;cursor:not-allowed;filter:grayscale(.5)}
+.cat-icon{font-size:1.7rem;line-height:1}
+.cat-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:1px;color:white;text-align:center;line-height:1.1}
+.cat-remaining{font-size:.65rem;color:rgba(255,255,255,.8);font-weight:700}
+.cat-films{background:linear-gradient(135deg,#ff6b6b,#cc1111);box-shadow:0 5px 18px rgba(255,107,107,.35)}
+.cat-geo{background:linear-gradient(135deg,#26de81,#0aaf5c);box-shadow:0 5px 18px rgba(38,222,129,.35)}
+.cat-musique{background:linear-gradient(135deg,#ffd32a,#e67e00);box-shadow:0 5px 18px rgba(255,211,42,.35)}
+.cat-wtf{background:linear-gradient(135deg,#a29bfe,#6c5ce7);box-shadow:0 5px 18px rgba(162,155,254,.35)}
+.cat-apero{background:linear-gradient(135deg,#fd79a8,#cc1166);box-shadow:0 5px 18px rgba(253,121,168,.35)}
+.cat-histoire{background:linear-gradient(135deg,#fd9644,#e55039);box-shadow:0 5px 18px rgba(253,150,68,.35)}
+.cat-sciences{background:linear-gradient(135deg,#26d0ce,#1a9faa);box-shadow:0 5px 18px rgba(38,208,206,.35)}
+.cat-series{background:linear-gradient(135deg,#4fc3f7,#0288d1);box-shadow:0 5px 18px rgba(79,195,247,.35)}
+.cat-jeux{background:linear-gradient(135deg,#5f27cd,#341f97);box-shadow:0 5px 18px rgba(95,39,205,.35)}
+.cat-sport{background:linear-gradient(135deg,#6ab04c,#badc58);box-shadow:0 5px 18px rgba(106,176,76,.35)}
+.cat-perso{background:linear-gradient(135deg,#f9ca24,#f0932b);box-shadow:0 5px 18px rgba(249,202,36,.35)}
+.cat-vf{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 5px 18px rgba(0,184,148,.35)}
+.cat-records{background:linear-gradient(135deg,#0652DD,#1289A7);box-shadow:0 5px 18px rgba(6,82,221,.35)}
+.cat-expressions{background:linear-gradient(135deg,#e17055,#d63031);box-shadow:0 5px 18px rgba(225,112,85,.35)}
+.cat-marques{background:linear-gradient(135deg,#636e72,#2d3436);box-shadow:0 5px 18px rgba(87,101,116,.35)}
+.cat-internet{background:linear-gradient(135deg,#00cec9,#6c5ce7);box-shadow:0 5px 18px rgba(0,206,201,.35)}
+.cat-nostalgie{background:linear-gradient(135deg,#be2edd,#8854d0);box-shadow:0 5px 18px rgba(190,46,221,.35)}
+.round-info{text-align:center;color:var(--muted);font-size:.8rem;margin-bottom:12px}
+.btn-end-game{display:block;margin:0 auto;background:var(--surface);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:9px 22px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s}
+.btn-end-game:hover{border-color:#ff6b6b;color:#ff6b6b}
+.score-adj-panel{background:var(--surface);border-radius:18px;margin:0 0 18px;overflow:hidden;border:1px solid rgba(255,255,255,.07)}
+.score-adj-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none;transition:background .2s}
+.score-adj-header:hover{background:rgba(255,255,255,.04)}
+.score-adj-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;display:flex;align-items:center;gap:8px;color:var(--muted)}
+.score-adj-chevron{font-size:.8rem;color:var(--muted);transition:transform .25s}
+.score-adj-body{display:none;padding:0 16px 16px;border-top:1px solid rgba(255,255,255,.07)}
+.score-adj-body.open{display:block}
+.adj-section-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin:14px 0 8px}
+.adj-teams{display:flex;flex-direction:column;gap:5px}
+.adj-team-row{display:flex;align-items:center;gap:9px;background:var(--surface2);border:2px solid transparent;border-radius:11px;padding:8px 11px;cursor:pointer;transition:all .15s}
+.adj-team-row:hover{border-color:rgba(255,255,255,.13)}
+.adj-team-row.sel{border-color:var(--adj-col,#a29bfe);background:rgba(162,155,254,.07)}
+.adj-team-row .adj-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.adj-team-row .adj-name{font-weight:700;font-size:.88rem;flex:1}
+.adj-team-row .adj-score{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;background:rgba(0,0,0,.22);border-radius:20px;padding:1px 10px;min-width:32px;text-align:center}
+.adj-pts-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.adj-step{width:38px;height:38px;border-radius:10px;background:var(--surface2);border:2px solid rgba(255,255,255,.1);color:var(--text);font-size:1.2rem;font-weight:900;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.adj-step:hover{border-color:#a29bfe;color:#a29bfe}
+.adj-pts-input{flex:1;text-align:center;background:var(--surface2);border:2px solid #3333aa;border-radius:11px;padding:8px 6px;color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:1.6rem;outline:none;min-width:0;-moz-appearance:textfield}
+.adj-pts-input::-webkit-outer-spin-button,.adj-pts-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.adj-pts-input:focus{border-color:#a29bfe}
+.adj-quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.adj-qbtn{background:var(--surface2);border:2px solid transparent;border-radius:50px;padding:5px 12px;color:var(--muted);font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif}
+.adj-qbtn:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.adj-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.adj-reason{background:var(--surface2);border:2px solid transparent;border-radius:50px;padding:5px 12px;color:var(--muted);font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif}
+.adj-reason:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.adj-reason.sel-pos{border-color:#26de81;color:#26de81;background:rgba(38,222,129,.1)}
+.adj-reason.sel-neg{border-color:#ff6b6b;color:#ff6b6b;background:rgba(255,107,107,.1)}
+.adj-custom{width:100%;background:var(--surface2);border:2px solid #3333aa;border-radius:11px;padding:8px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s;margin-bottom:12px}
+.adj-custom:focus{border-color:#a29bfe}
+.adj-custom::placeholder{color:var(--muted)}
+.adj-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.adj-btn-add,.adj-btn-rem{border:none;border-radius:12px;padding:11px 8px;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.adj-btn-add{background:linear-gradient(135deg,#26de81,#0aaf5c);box-shadow:0 4px 14px rgba(38,222,129,.28)}
+.adj-btn-add:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(38,222,129,.42)}
+.adj-btn-rem{background:linear-gradient(135deg,#ff6b6b,#cc1111);box-shadow:0 4px 14px rgba(255,107,107,.28)}
+.adj-btn-rem:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,107,.42)}
+.adj-btn-add:disabled,.adj-btn-rem:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none}
+.adj-feedback{font-size:.76rem;font-weight:700;text-align:center;margin-top:9px;min-height:16px;opacity:0;transition:opacity .22s}
+.adj-feedback.show{opacity:1}
+.adj-hist{margin-top:14px;display:none}
+.adj-hist-title{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:7px}
+.adj-hist-row{display:flex;align-items:center;gap:6px;background:var(--surface2);border-radius:8px;padding:6px 10px;margin-bottom:4px;font-size:.73rem}
+.adj-hist-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.adj-hist-name{font-weight:700;min-width:55px;max-width:75px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adj-hist-pts{font-family:'Bebas Neue',sans-serif;font-size:.95rem;min-width:28px;text-align:center;flex-shrink:0}
+.adj-hist-reason{flex:1;color:var(--muted);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adj-hist-score{color:var(--muted);font-size:.67rem;flex-shrink:0}
+#s-question{text-align:center;padding:28px 20px}
+.q-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.q-cat-badge{display:inline-block;border-radius:50px;padding:7px 22px;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;border:2px solid transparent}
+.diff-badge{display:inline-block;border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.diff-badge.facile{background:rgba(38,222,129,.2);color:#26de81}
+.diff-badge.moyen{background:rgba(255,211,42,.2);color:#ffd32a}
+.diff-badge.difficile{background:rgba(255,107,107,.2);color:#ff6b6b}
+.timer-wrap{position:relative;width:96px;height:96px;margin:0 auto 18px}
+.timer-svg{transform:rotate(-90deg);width:96px;height:96px}
+.t-bg{fill:none;stroke:var(--surface2);stroke-width:8}
+.t-ring{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:276;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .5s}
+.timer-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+.timer-urgent{animation:pulse .5s ease-in-out infinite;color:#ff6b6b!important}
+.q-box{background:var(--surface);border-radius:22px;padding:28px 34px;margin:0 auto 18px;max-width:700px}
+.q-text{font-size:1.7rem;font-weight:900;line-height:1.3}
+.q-num{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.q-translation{margin-top:10px;font-size:.92rem;color:var(--muted);font-style:italic;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.q-translation:empty{display:none}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-width:700px;margin:0 auto 16px}
+.choice-btn{background:var(--surface);border:2px solid rgba(255,255,255,.1);border-radius:13px;padding:13px 16px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:10px}
+.choice-btn:hover{border-color:rgba(255,255,255,.3);background:var(--surface2)}
+.choice-letter{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;opacity:.5;min-width:18px}
+.btn-reveal{border:none;border-radius:14px;padding:13px 42px;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;cursor:pointer;transition:transform .1s,box-shadow .2s}
+.btn-reveal:hover{transform:scale(1.05)}
+#s-answer{text-align:center;padding:28px 20px}
+.a-q-mini{background:var(--surface);border-radius:14px;padding:14px 22px;margin:0 auto 13px;max-width:700px;text-align:left}
+.a-q-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.a-q-text{font-size:1rem;font-weight:700}
+.answer-box{background:var(--surface);border-radius:22px;padding:22px 36px;margin:0 auto 15px;max-width:700px;position:relative;overflow:hidden}
+.answer-box::before{content:'';position:absolute;inset:0;opacity:.07;background:var(--cat-color,#fff)}
+.answer-label{font-size:.75rem;text-transform:uppercase;letter-spacing:3px;color:var(--muted);margin-bottom:8px}
+.answer-text{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:4px;line-height:1}
+.answer-translation{font-size:1.1rem;color:var(--muted);font-style:italic;margin-top:6px}
+.answer-translation:empty{display:none}
+.answer-expl{font-size:.85rem;color:var(--muted);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)}
+.answer-expl:empty{display:none}
+@keyframes pop-in{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.pop-in{animation:pop-in .4s cubic-bezier(.175,.885,.32,1.275)}
+.pts-label{color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:11px}
+.pts-grid{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:700px;margin:0 auto 22px}
+.pt-btn{background:var(--surface);border:2px solid rgba(255,255,255,.15);border-radius:50px;padding:9px 18px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px}
+.pt-btn .pt-dot{width:8px;height:8px;border-radius:50%}
+.pt-btn .pt-score{background:rgba(0,0,0,.3);border-radius:20px;padding:1px 9px;font-family:'Bebas Neue',sans-serif;font-size:1.15rem}
+.pt-btn:hover:not(:disabled){transform:scale(1.05)}
+.pt-btn.awarded{color:#0a2a15}
+.pt-btn:disabled{cursor:default}
+.btn-continue{border:2px solid rgba(255,255,255,.2);border-radius:13px;padding:12px 40px;color:var(--text);background:transparent;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.btn-continue:hover{border-color:white;background:rgba(255,255,255,.08)}
+#s-end{text-align:center;padding:40px 20px}
+.end-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:4px;margin-bottom:8px}
+.end-sub{color:var(--muted);margin-bottom:36px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:28px}
+.podium-spot{display:flex;flex-direction:column;align-items:center;gap:8px}
+.pod-name{font-weight:900;font-size:.9rem;max-width:110px;word-break:break-word;line-height:1.2}
+.pod-score{font-family:'Bebas Neue',sans-serif;font-size:1.5rem}
+.pod-bar{width:110px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:center}
+.pod-emoji{font-size:2rem}
+.gold .pod-bar{background:linear-gradient(180deg,#ffd700,#e67e00);height:175px}
+.silver .pod-bar{background:linear-gradient(180deg,#c0c0c0,#888);height:125px}
+.bronze .pod-bar{background:linear-gradient(180deg,#cd7f32,#8b4513);height:85px}
+.other-rankings{max-width:400px;margin:0 auto 36px}
+.rank-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:12px;padding:10px 16px;margin-bottom:8px}
+.rank-pos{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);width:28px}
+.rank-name{font-weight:700;flex:1;text-align:left;padding-left:11px}
+.rank-pts{font-family:'Bebas Neue',sans-serif;font-size:1.3rem}
+.btn-restart{background:linear-gradient(135deg,#ff6b6b,#fd79a8);border:none;border-radius:14px;padding:14px 44px;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:2px;cursor:pointer;transition:transform .1s;box-shadow:0 8px 25px rgba(255,107,107,.4);margin-right:10px}
+.btn-restart:hover{transform:scale(1.05)}
+.btn-new-teams{background:var(--surface);border:2px solid rgba(255,255,255,.2);border-radius:14px;padding:14px 26px;color:var(--text);font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.btn-new-teams:hover{border-color:white}
+.confetti-c{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;overflow:hidden}
+.confetti-p{position:absolute;top:-20px;animation:cffall 2.2s ease-in forwards}
+@keyframes cffall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+@keyframes slide-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.slide-in{animation:slide-in .32s ease-out}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="confetti-c" id="conf"></div>
+<div id="s-setup" class="screen active">
+  <div class="logo">KOOLAYA<br>BAR QUIZ</div>
+  <div class="logo-sub">🏕️ Édition Camping — 500+ Questions 🏕️</div>
+  <div class="setup-cols">
+    <div class="teams-section">
+      <h3>👥 Équipes</h3>
+      <div class="team-input-row">
+        <input type="text" id="team-input" placeholder="Nom de l'équipe…" maxlength="20"/>
+        <button class="btn-add" onclick="addTeam()">+</button>
+      </div>
+      <p class="team-count-hint" id="count-hint">2 équipes minimum · 8 maximum</p>
+      <ul class="teams-list" id="teams-list"></ul>
+    </div>
+    <div class="setup-options">
+      <h3>⚙️ Options de jeu</h3>
+      <div class="opt-row">
+        <div class="opt-label">Difficulté</div>
+        <div class="diff-pills">
+          <button class="diff-pill active" data-diff="all" onclick="setDiff(this)">🎲 Toutes</button>
+          <button class="diff-pill" data-diff="facile" onclick="setDiff(this)">🟢 Facile</button>
+          <button class="diff-pill" data-diff="moyen" onclick="setDiff(this)">🟡 Moyen</button>
+          <button class="diff-pill" data-diff="difficile" onclick="setDiff(this)">🔴 Difficile</button>
+        </div>
+      </div>
+      <div class="opt-row">
+        <div class="opt-label">Catégories</div>
+        <div class="cats-select-row">
+          <button class="cats-select-all" onclick="selectAllCats(true)">✅ Tout</button>
+          <button class="cats-select-all" onclick="selectAllCats(false)">❌ Aucune</button>
+        </div>
+        <div class="cats-checkboxes" id="cats-checkboxes"></div>
+      </div>
+      <div class="opt-row">
+        <div class="opt-label">Mode de jeu</div>
+        <div class="qcm-toggle">
+          <label class="toggle-switch">
+            <input type="checkbox" id="qcm-toggle" onchange="qcmMode=this.checked">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:.85rem">Afficher les propositions (QCM)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-start title-font" id="btn-start" onclick="startGame()" disabled>🎤 C'EST PARTI !</button>
+  <p class="setup-hint">Appuie sur Entrée pour ajouter une équipe</p>
+</div>
+<div id="s-cats" class="screen">
+  <div class="scoreboard" id="scoreboard"></div>
+  <p class="section-title">Choisir une catégorie</p>
+  <div class="categories-grid" id="categories-grid"></div>
+  <p class="round-info" id="round-info"></p>
+
+  <!-- ── SCORE ADJUSTMENT PANEL ─────────────────────── -->
+  <div class="score-adj-panel" id="score-adj-panel">
+    <div class="score-adj-header" onclick="toggleAdjPanel()">
+      <span class="score-adj-title">⚙️ Ajustement manuel des scores</span>
+      <span class="score-adj-chevron" id="adj-chevron">▼</span>
+    </div>
+    <div class="score-adj-body" id="score-adj-body">
+      <div class="adj-section-label">Équipe</div>
+      <div class="adj-teams" id="adj-teams-list"></div>
+      <div class="adj-section-label">Points</div>
+      <div class="adj-pts-row">
+        <button class="adj-step" onclick="adjStep(-1)">−</button>
+        <input type="number" class="adj-pts-input" id="adj-pts" value="1" min="1">
+        <button class="adj-step" onclick="adjStep(1)">+</button>
+      </div>
+      <div class="adj-quick">
+        <button class="adj-qbtn" onclick="adjSetPts(1)">1</button>
+        <button class="adj-qbtn" onclick="adjSetPts(2)">2</button>
+        <button class="adj-qbtn" onclick="adjSetPts(3)">3</button>
+        <button class="adj-qbtn" onclick="adjSetPts(5)">5</button>
+        <button class="adj-qbtn" onclick="adjSetPts(10)">10</button>
+      </div>
+      <div class="adj-section-label">Raison</div>
+      <div class="adj-reasons">
+        <button class="adj-reason" data-r="Bonus" data-t="pos" onclick="adjPickReason(this)">🎁 Bonus</button>
+        <button class="adj-reason" data-r="Bonne ambiance" data-t="pos" onclick="adjPickReason(this)">🎉 Bonne ambiance</button>
+        <button class="adj-reason" data-r="Défi réussi" data-t="pos" onclick="adjPickReason(this)">🏅 Défi réussi</button>
+        <button class="adj-reason" data-r="Triche" data-t="neg" onclick="adjPickReason(this)">🚫 Triche</button>
+        <button class="adj-reason" data-r="Comportement" data-t="neg" onclick="adjPickReason(this)">⚠️ Comportement</button>
+      </div>
+      <input type="text" class="adj-custom" id="adj-custom" placeholder="Raison personnalisée…" maxlength="60" oninput="adjCustom(this.value)">
+      <div class="adj-actions">
+        <button class="adj-btn-add" id="adj-btn-add" onclick="adjApply(1)" disabled>✅ AJOUTER</button>
+        <button class="adj-btn-rem" id="adj-btn-rem" onclick="adjApply(-1)" disabled>➖ RETIRER</button>
+      </div>
+      <div class="adj-feedback" id="adj-feedback"></div>
+      <div class="adj-hist" id="adj-hist">
+        <div class="adj-hist-title">Historique</div>
+        <div id="adj-hist-list"></div>
+      </div>
+    </div>
+  </div>
+  <!-- ─────────────────────────────────────────────────── -->
+
+  <button class="btn-end-game" onclick="endGame()">⛳ Terminer la partie</button>
+</div>
+<div id="s-question" class="screen">
+  <div style="text-align:center;padding:28px 20px">
+    <div class="q-header">
+      <span class="q-cat-badge" id="q-badge"></span>
+      <span class="diff-badge" id="q-diff-badge"></span>
+    </div>
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 96 96">
+        <circle class="t-bg" cx="48" cy="48" r="44"/>
+        <circle class="t-ring" id="t-ring" cx="48" cy="48" r="44"/>
+      </svg>
+      <div class="timer-num" id="t-num">30</div>
+    </div>
+    <div class="q-box slide-in">
+      <div class="q-num" id="q-num"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-translation" id="q-translation"></div>
+    </div>
+    <div class="choices-grid" id="choices-grid" style="display:none"></div>
+    <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">👁️ RÉVÉLER LA RÉPONSE</button>
+  </div>
+</div>
+<div id="s-answer" class="screen">
+  <div style="text-align:center;padding:28px 20px">
+    <span class="q-cat-badge" id="a-badge"></span>
+    <div class="a-q-mini"><div class="a-q-label">Question</div><div class="a-q-text" id="a-q-text"></div></div>
+    <div class="answer-box">
+      <div class="answer-label">RÉPONSE</div>
+      <div class="answer-text pop-in" id="answer-text"></div>
+      <div class="answer-translation" id="answer-translation"></div>
+      <div class="answer-expl" id="answer-expl"></div>
+    </div>
+    <p class="pts-label">Qui a trouvé ? (cliquez pour +1 point)</p>
+    <div class="pts-grid" id="pts-grid"></div>
+    <button class="btn-continue" onclick="next()">Continuer →</button>
+  </div>
+</div>
+<div id="s-end" class="screen">
+  <div style="padding:40px 20px;text-align:center">
+    <div class="end-title">🏆 RÉSULTATS FINAUX</div>
+    <div class="end-sub">Félicitations à tous les joueurs !</div>
+    <div class="podium" id="podium"></div>
+    <div class="other-rankings" id="other-ranks"></div>
+    <button class="btn-restart" onclick="replay()">🔄 REJOUER</button>
+    <button class="btn-new-teams" onclick="goSetup()">👥 NOUVELLES ÉQUIPES</button>
+  </div>
+</div>
+
+</div>
+<script>
+const TC=['#ff6b6b','#26de81','#ffd32a','#a29bfe','#fd79a8','#4fc3f7','#ff9f43','#00d2d3'];
+const CM={
+  films:   {name:'Cinéma',        icon:'🎬',color:'#ff6b6b',bg:'rgba(255,107,107,.15)',border:'rgba(255,107,107,.4)'},
+  geo:     {name:'Géographie',    icon:'🌍',color:'#26de81',bg:'rgba(38,222,129,.15)',border:'rgba(38,222,129,.4)'},
+  musique: {name:'Musique',       icon:'🎵',color:'#ffd32a',bg:'rgba(255,211,42,.15)',border:'rgba(255,211,42,.4)'},
+  wtf:     {name:'Devinettes',    icon:'🤪',color:'#a29bfe',bg:'rgba(162,155,254,.15)',border:'rgba(162,155,254,.4)'},
+  apero:   {name:'Gastronomie',   icon:'🍹',color:'#fd79a8',bg:'rgba(253,121,168,.15)',border:'rgba(253,121,168,.4)'},
+  histoire:{name:'Histoire',      icon:'📜',color:'#fd9644',bg:'rgba(253,150,68,.15)',border:'rgba(253,150,68,.4)'},
+  sciences:{name:'Sciences',      icon:'🔬',color:'#26d0ce',bg:'rgba(38,208,206,.15)',border:'rgba(38,208,206,.4)'},
+  series:  {name:'Séries TV',     icon:'📺',color:'#4fc3f7',bg:'rgba(79,195,247,.15)',border:'rgba(79,195,247,.4)'},
+  jeux:    {name:'Jeux Vidéo',    icon:'🎮',color:'#a29bfe',bg:'rgba(95,39,205,.15)',border:'rgba(95,39,205,.4)'},
+  sport:   {name:'Sport',         icon:'⚽',color:'#6ab04c',bg:'rgba(106,176,76,.15)',border:'rgba(106,176,76,.4)'},
+  perso:   {name:'Personnalités', icon:'🌟',color:'#f9ca24',bg:'rgba(249,202,36,.15)',border:'rgba(249,202,36,.4)'},
+  vf:      {name:'Vrai ou Faux',  icon:'✅',color:'#00b894',bg:'rgba(0,184,148,.15)',border:'rgba(0,184,148,.4)'},
+  records: {name:'Records',       icon:'🏆',color:'#4fc3f7',bg:'rgba(6,82,221,.15)',border:'rgba(6,82,221,.4)'},
+  expressions:{name:'Expressions',icon:'💬',color:'#e17055',bg:'rgba(225,112,85,.15)',border:'rgba(225,112,85,.4)'},
+  marques: {name:'Marques',       icon:'®',color:'#b2bec3',bg:'rgba(87,101,116,.15)',border:'rgba(87,101,116,.4)'},
+  internet:{name:'Internet',      icon:'🌐',color:'#00cec9',bg:'rgba(0,206,201,.15)',border:'rgba(0,206,201,.4)'},
+  nostalgie:{name:'Années 90/2000',icon:'🕹️',color:'#be2edd',bg:'rgba(190,46,221,.15)',border:'rgba(190,46,221,.4)'}
+};
+const Q={
+films:[
+{q:"Quel film Disney met en scène Elsa et ses pouvoirs de glace ?",a:"La Reine des Neiges",qt:"Which Disney film features Elsa and her ice powers?",at:"Frozen",diff:"facile",c:["La Reine des Neiges","Cendrillon","Blanche-Neige","La Belle au Bois Dormant"]},
+{q:"Quel film montre un paquebot percuter un iceberg ?",a:"Titanic",qt:"Which film shows an ocean liner hitting an iceberg?",at:"Titanic",diff:"facile",c:["Titanic","The Poseidon Adventure","Pearl Harbor","Naufragés"],e:"Film de James Cameron (1997) avec Leonardo DiCaprio."},
+{q:"Dans quel film vit-on dans une simulation de la réalité ?",a:"Matrix",qt:"In which film do people live in a computer-generated simulation of reality?",at:"The Matrix",diff:"facile",c:["Matrix","Inception","Avatar","Interstellar"]},
+{q:"Dans quel film des jouets s'animent quand les humains ne regardent pas ?",a:"Toy Story",qt:"In which film do toys come to life when humans aren't looking?",at:"Toy Story",diff:"facile",c:["Toy Story","Monstres & Cie","Cars","Ratatouille"],e:"Premier film Pixar entièrement en images de synthèse (1995)."},
+{q:"Dans quel film un lion nommé Simba doit retrouver son royaume ?",a:"Le Roi Lion",qt:"In which film does a lion named Simba have to reclaim his kingdom?",at:"The Lion King",diff:"facile",c:["Le Roi Lion","Bambi","Tarzan","Madagascar"]},
+{q:"Dans quel film un poisson-clown cherche son fils Nemo ?",a:"Le Monde de Nemo",qt:"In which film does a clownfish search for his son Nemo?",at:"Finding Nemo",diff:"facile",c:["Le Monde de Nemo","Shark Tale","Ponyo","Le Monde de Dory"]},
+{q:"Quel film met en scène des dinosaures recréés sur une île ?",a:"Jurassic Park",qt:"Which film features dinosaurs recreated on an island?",at:"Jurassic Park",diff:"facile",c:["Jurassic Park","Godzilla","King Kong","Le Monde Perdu"]},
+{q:"Dans quel film un garçon dit 'Je vois des gens morts' ?",a:"Sixième Sens",qt:"In which film does a boy say 'I see dead people'?",at:"The Sixth Sense",diff:"facile",c:["Sixième Sens","L'Exorciste","Insidious","Conjuring"]},
+{q:"Quel film de 2009 met en scène des êtres bleus sur la planète Pandora ?",a:"Avatar",qt:"Which 2009 film features blue beings on the planet Pandora?",at:"Avatar",diff:"facile",c:["Avatar","Matrix","Gravity","Interstellar"]},
+{q:"Quel film met en scène un ogre vert vivant dans un marais ?",a:"Shrek",qt:"Which film features a green ogre living in a swamp?",at:"Shrek",diff:"facile",c:["Shrek","Trolls","Les Boxtrolls","Minions"]},
+{q:"Qui joue Spider-Man dans la trilogie de Sam Raimi ?",a:"Tobey Maguire",qt:"Who plays Spider-Man in Sam Raimi's trilogy?",at:"Tobey Maguire",diff:"facile",c:["Tobey Maguire","Andrew Garfield","Tom Holland","Chris Evans"]},
+{q:"Dans quel film Harry Potter va-t-il pour la première fois à Poudlard ?",a:"Harry Potter à l'école des sorciers",qt:"In which film does Harry Potter go to Hogwarts for the first time?",at:"Harry Potter and the Sorcerer's Stone",diff:"facile",c:["Harry Potter à l'école des sorciers","Harry Potter et la Chambre","Harry Potter et l'Azkaban","Harry Potter et la Coupe"]},
+{q:"Qui réalise le film Inception ?",a:"Christopher Nolan",qt:"Who directs the film Inception?",at:"Christopher Nolan",diff:"moyen",c:["Christopher Nolan","Steven Spielberg","James Cameron","Ridley Scott"]},
+{q:"Quel acteur joue Forrest Gump ?",a:"Tom Hanks",qt:"Which actor plays Forrest Gump?",at:"Tom Hanks",diff:"moyen",c:["Tom Hanks","Tom Cruise","Brad Pitt","Kevin Costner"]},
+{q:"Dans quel film entend-on la réplique culte 'I'll be back' ?",a:"Terminator",qt:"In which film do we hear the iconic line 'I'll be back'?",at:"Terminator",diff:"moyen",c:["Terminator","RoboCop","Total Recall","Predator"],e:"Réplique d'Arnold Schwarzenegger dans le film de James Cameron (1984)."},
+{q:"Quelle actrice joue Katniss dans Hunger Games ?",a:"Jennifer Lawrence",qt:"Which actress plays Katniss in The Hunger Games?",at:"Jennifer Lawrence",diff:"moyen",c:["Jennifer Lawrence","Emma Stone","Emma Watson","Scarlett Johansson"]},
+{q:"Quel pays a produit le film Parasite (2019) ?",a:"Corée du Sud",qt:"Which country produced the film Parasite (2019)?",at:"South Korea",diff:"moyen",c:["Corée du Sud","Chine","Japon","Thaïlande"],e:"Réalisé par Bong Joon-ho, il remporta la Palme d'Or et l'Oscar du meilleur film."},
+{q:"Qui joue Iron Man dans l'univers Marvel ?",a:"Robert Downey Jr.",qt:"Who plays Iron Man in the Marvel universe?",at:"Robert Downey Jr.",diff:"moyen",c:["Robert Downey Jr.","Chris Evans","Mark Ruffalo","Jeremy Renner"]},
+{q:"Qui compose la musique emblématique de Star Wars ?",a:"John Williams",qt:"Who composes the iconic Star Wars music?",at:"John Williams",diff:"moyen",c:["John Williams","Hans Zimmer","Ennio Morricone","Howard Shore"]},
+{q:"Quel film de 2019 raconte l'origine du Joker avec Joaquin Phoenix ?",a:"Joker",qt:"Which 2019 film tells the origin story of the Joker with Joaquin Phoenix?",at:"Joker",diff:"moyen",c:["Joker","Batman v Superman","Suicide Squad","Birds of Prey"]},
+{q:"Dans quel film Leonardo DiCaprio joue-t-il un trader véreux ?",a:"Le Loup de Wall Street",qt:"In which film does Leonardo DiCaprio play a corrupt stockbroker?",at:"The Wolf of Wall Street",diff:"moyen",c:["Le Loup de Wall Street","Gatsby le Magnifique","Aviator","The Revenant"]},
+{q:"Dans quel film Tom Hanks vit-il bloqué dans un aéroport ?",a:"Le Terminal",qt:"In which film is Tom Hanks stranded in an airport?",at:"The Terminal",diff:"moyen",c:["Le Terminal","Cast Away","Philadelphia","Da Vinci Code"]},
+{q:"Quel personnage Johnny Depp joue-t-il dans Pirates des Caraïbes ?",a:"Jack Sparrow",qt:"Which character does Johnny Depp play in Pirates of the Caribbean?",at:"Jack Sparrow",diff:"moyen",c:["Jack Sparrow","Will Turner","Davy Jones","Barbossa"]},
+{q:"Qui réalise Pulp Fiction ?",a:"Quentin Tarantino",qt:"Who directs Pulp Fiction?",at:"Quentin Tarantino",diff:"difficile",c:["Quentin Tarantino","Martin Scorsese","Stanley Kubrick","Coen Brothers"]},
+{q:"Qui a réalisé 2001 : L'Odyssée de l'espace ?",a:"Stanley Kubrick",qt:"Who directed 2001: A Space Odyssey?",at:"Stanley Kubrick",diff:"difficile",c:["Stanley Kubrick","Steven Spielberg","Ridley Scott","Orson Welles"]},
+{q:"Quel film a remporté l'Oscar du meilleur film en 2020 ?",a:"Parasite",qt:"Which film won the Best Picture Oscar in 2020?",at:"Parasite",diff:"difficile",c:["Parasite","1917","Joker","Once Upon a Time in Hollywood"]},
+{q:"Dans quel film Jodie Foster affronte-t-elle Hannibal Lecter ?",a:"Le Silence des Agneaux",qt:"In which film does Jodie Foster face off against Hannibal Lecter?",at:"The Silence of the Lambs",diff:"difficile",c:["Le Silence des Agneaux","Hannibal","Red Dragon","Manhunter"]},
+{q:"Dans quel film entend-on 'Frankly my dear, I don't give a damn' ?",a:"Autant en emporte le vent",qt:"In which film do we hear 'Frankly my dear, I don't give a damn'?",at:"Gone with the Wind",diff:"difficile",c:["Autant en emporte le vent","Casablanca","Citizen Kane","Sunset Boulevard"],e:"Film de 1939 avec Clark Gable et Vivien Leigh."},
+{q:"Quel est le vrai prénom du personnage Scarface ?",a:"Tony Montana",qt:"What is the real first name of the character Scarface?",at:"Tony Montana",diff:"difficile",c:["Tony Montana","Al Montana","Scarface Romano","Antonio Carlos"],e:"Joué par Al Pacino, le personnage s'appelle Antonio 'Tony' Montana."},
+{q:"En quelle année est sorti Blade Runner de Ridley Scott ?",a:"1982",qt:"In which year was Ridley Scott's Blade Runner released?",at:"1982",diff:"difficile",c:["1982","1979","1985","1984"]},
+{q:"Qui a réalisé 'Il était une fois dans l'Ouest' ?",a:"Sergio Leone",qt:"Who directed 'Once Upon a Time in the West'?",at:"Sergio Leone",diff:"difficile",c:["Sergio Leone","John Ford","Clint Eastwood","Sam Peckinpah"]},
+{q:"Quel acteur joue le rôle principal dans Gladiator (2000) ?",a:"Russell Crowe",qt:"Which actor plays the lead role in Gladiator (2000)?",at:"Russell Crowe",diff:"moyen",c:["Russell Crowe","Joaquin Phoenix","Brad Pitt","Tom Cruise"]},
+{q:"Dans quel film entend-on 'Houston, on a un problème' ?",a:"Apollo 13",qt:"In which film do we hear 'Houston, we have a problem'?",at:"Apollo 13",diff:"moyen",c:["Apollo 13","Gravity","The Martian","Interstellar"]},
+{q:"Quel réalisateur a créé la saga Star Wars ?",a:"George Lucas",qt:"Which director created the Star Wars saga?",at:"George Lucas",diff:"facile",c:["George Lucas","Steven Spielberg","James Cameron","Ridley Scott"]},
+],
+geo:[
+{q:"Quelle est la capitale de l'Espagne ?",a:"Madrid",qt:"What is the capital of Spain?",at:"Madrid",diff:"facile",c:["Madrid","Barcelone","Séville","Valence"]},
+{q:"Quelle est la capitale de l'Italie ?",a:"Rome",qt:"What is the capital of Italy?",at:"Rome",diff:"facile",c:["Rome","Milan","Naples","Venise"]},
+{q:"Dans quel pays se trouve la Tour Eiffel ?",a:"France",qt:"In which country is the Eiffel Tower located?",at:"France",diff:"facile",c:["France","Belgique","Suisse","Luxembourg"]},
+{q:"Quel est le plus grand pays du monde par superficie ?",a:"Russie",qt:"What is the largest country in the world by area?",at:"Russia",diff:"facile",c:["Russie","Canada","Chine","États-Unis"]},
+{q:"Quelle est la capitale de l'Allemagne ?",a:"Berlin",qt:"What is the capital of Germany?",at:"Berlin",diff:"facile",c:["Berlin","Munich","Hambourg","Francfort"]},
+{q:"Dans quel pays se trouve le Taj Mahal ?",a:"Inde",qt:"In which country is the Taj Mahal located?",at:"India",diff:"facile",c:["Inde","Pakistan","Bangladesh","Sri Lanka"]},
+{q:"Quelle est la capitale du Japon ?",a:"Tokyo",qt:"What is the capital of Japan?",at:"Tokyo",diff:"facile",c:["Tokyo","Osaka","Kyoto","Hiroshima"]},
+{q:"Dans quel pays se trouve Sydney ?",a:"Australie",qt:"In which country is Sydney located?",at:"Australia",diff:"facile",c:["Australie","Nouvelle-Zélande","Fidji","Papouasie"]},
+{q:"Quel est le plus haut sommet du monde ?",a:"L'Everest",qt:"What is the highest mountain in the world?",at:"Mount Everest",diff:"facile",c:["L'Everest","Le K2","L'Aconcagua","Le Mont Blanc"]},
+{q:"Quel fleuve traverse Paris ?",a:"La Seine",qt:"Which river flows through Paris?",at:"The Seine",diff:"facile",c:["La Seine","La Loire","Le Rhône","La Garonne"]},
+{q:"Quelle est la capitale de la Chine ?",a:"Pékin",qt:"What is the capital of China?",at:"Beijing",diff:"facile",c:["Pékin","Shanghai","Hong Kong","Nankin"]},
+{q:"Sur quel continent se trouve l'Égypte ?",a:"Afrique",qt:"On which continent is Egypt located?",at:"Africa",diff:"facile",c:["Afrique","Asie","Moyen-Orient","Europe"]},
+{q:"Quelle est la capitale du Canada ?",a:"Ottawa",qt:"What is the capital of Canada?",at:"Ottawa",diff:"moyen",c:["Ottawa","Toronto","Montréal","Vancouver"]},
+{q:"Dans quel pays se trouve le Machu Picchu ?",a:"Pérou",qt:"In which country is Machu Picchu located?",at:"Peru",diff:"moyen",c:["Pérou","Bolivie","Chili","Colombie"]},
+{q:"Quelle est la capitale de l'Australie ?",a:"Canberra",qt:"What is the capital of Australia?",at:"Canberra",diff:"moyen",c:["Canberra","Sydney","Melbourne","Brisbane"]},
+{q:"Quel est le plus petit pays du monde ?",a:"Vatican",qt:"What is the smallest country in the world?",at:"Vatican City",diff:"moyen",c:["Vatican","Monaco","Saint-Marin","Liechtenstein"]},
+{q:"Quelle est la capitale du Brésil ?",a:"Brasilia",qt:"What is the capital of Brazil?",at:"Brasilia",diff:"moyen",c:["Brasilia","Rio de Janeiro","São Paulo","Salvador"]},
+{q:"Quel pays est le plus peuplé du monde en 2024 ?",a:"Inde",qt:"Which is the most populous country in the world in 2024?",at:"India",diff:"moyen",c:["Inde","Chine","États-Unis","Indonésie"],e:"L'Inde a dépassé la Chine en 2023."},
+{q:"Dans quel pays se trouve le canal de Panama ?",a:"Panama",qt:"In which country is the Panama Canal located?",at:"Panama",diff:"moyen",c:["Panama","Colombie","Nicaragua","Costa Rica"]},
+{q:"Quel est le désert le plus grand du monde ?",a:"Le Sahara",qt:"What is the largest desert in the world?",at:"The Sahara",diff:"moyen",c:["Le Sahara","L'Antarctique","Le Gobi","L'Arabie"],e:"Le Sahara est le plus grand désert chaud."},
+{q:"Quelle est la capitale de l'Égypte ?",a:"Le Caire",qt:"What is the capital of Egypt?",at:"Cairo",diff:"moyen",c:["Le Caire","Alexandrie","Louxor","Assouan"]},
+{q:"Quel pays est connu comme le 'Pays du Soleil Levant' ?",a:"Japon",qt:"Which country is known as the 'Land of the Rising Sun'?",at:"Japan",diff:"moyen",c:["Japon","Corée du Sud","Thaïlande","Chine"]},
+{q:"Quel fleuve est le plus long d'Europe ?",a:"La Volga",qt:"Which is the longest river in Europe?",at:"The Volga",diff:"moyen",c:["La Volga","Le Danube","Le Rhin","Le Dniepr"],e:"La Volga (3 690 km) se jette dans la mer Caspienne."},
+{q:"Quelle est la capitale de la Nouvelle-Zélande ?",a:"Wellington",qt:"What is the capital of New Zealand?",at:"Wellington",diff:"difficile",c:["Wellington","Auckland","Christchurch","Hamilton"]},
+{q:"Quelle est la capitale du Kazakhstan ?",a:"Astana",qt:"What is the capital of Kazakhstan?",at:"Astana",diff:"difficile",c:["Astana","Almaty","Noursoultan","Chymkent"],e:"Elle a porté plusieurs noms : Astana, Noursoultan, puis de nouveau Astana (2022)."},
+{q:"Quelle chaîne de montagnes sépare l'Europe de l'Asie ?",a:"L'Oural",qt:"Which mountain range separates Europe from Asia?",at:"The Urals",diff:"difficile",c:["L'Oural","Le Caucase","Les Alpes","Les Carpates"]},
+{q:"Quel pays possède le plus grand nombre de lacs au monde ?",a:"Canada",qt:"Which country has the most lakes in the world?",at:"Canada",diff:"difficile",c:["Canada","Russie","Finlande","Suède"],e:"Le Canada possède plus de 3 millions de lacs."},
+{q:"Dans quel pays se trouve le lac Titicaca ?",a:"Pérou et Bolivie",qt:"In which country is Lake Titicaca located?",at:"Peru and Bolivia",diff:"difficile",c:["Pérou et Bolivie","Argentine et Chili","Équateur et Colombie","Brésil et Paraguay"]},
+{q:"Quelle est la capitale de la Mongolie ?",a:"Oulan-Bator",qt:"What is the capital of Mongolia?",at:"Ulaanbaatar",diff:"difficile",c:["Oulan-Bator","Darkhan","Erdenet","Choibalsan"]},
+{q:"Quel est le seul pays qui borde à la fois l'Atlantique et la Méditerranée (hors Europe) ?",a:"Maroc",qt:"Which is the only country bordering both the Atlantic and the Mediterranean (outside Europe)?",at:"Morocco",diff:"difficile",c:["Maroc","Algérie","Libye","Mauritanie"]},
+{q:"Quelle est la ville la plus haute du monde (capitale) ?",a:"La Paz (Bolivie)",qt:"What is the highest capital city in the world?",at:"La Paz (Bolivia)",diff:"difficile",c:["La Paz (Bolivie)","Quito (Équateur)","Lhassa (Tibet)","Bogotá (Colombie)"],e:"La Paz est à 3 625 m d'altitude."},
+{q:"Quel pays compte le plus grand nombre de fuseaux horaires ?",a:"France (à cause de ses territoires d'outre-mer)",qt:"Which country has the most time zones?",at:"France (because of its overseas territories)",diff:"difficile",c:["France","Russie","États-Unis","Royaume-Uni"]},
+{q:"Quel pays européen a pour capitale Lisbonne ?",a:"Portugal",qt:"Which European country has Lisbon as its capital?",at:"Portugal",diff:"facile",c:["Portugal","Espagne","Italie","Grèce"]},
+{q:"Quelle mer borde la Grèce et la Turquie ?",a:"La mer Égée",qt:"Which sea borders Greece and Turkey?",at:"The Aegean Sea",diff:"moyen",c:["La mer Égée","La mer Noire","La mer Adriatique","La mer Tyrrhénienne"]},
+],
+musique:[
+{q:"Qui chante 'Thriller' ?",a:"Michael Jackson",qt:"Who sings 'Thriller'?",at:"Michael Jackson",diff:"facile",c:["Michael Jackson","Prince","James Brown","Stevie Wonder"]},
+{q:"Qui était le chanteur emblématique de Queen ?",a:"Freddie Mercury",qt:"Who was the iconic lead singer of Queen?",at:"Freddie Mercury",diff:"facile",c:["Freddie Mercury","David Bowie","Elton John","Rod Stewart"]},
+{q:"Qui interprète 'Hello' (2015) ?",a:"Adele",qt:"Who performs 'Hello' (2015)?",at:"Adele",diff:"facile",c:["Adele","Beyoncé","Rihanna","Sam Smith"]},
+{q:"Qui chante 'Shape of You' ?",a:"Ed Sheeran",qt:"Who sings 'Shape of You'?",at:"Ed Sheeran",diff:"facile",c:["Ed Sheeran","Harry Styles","Sam Smith","Bruno Mars"]},
+{q:"Quel DJ français est mondialement connu pour ses hits électro ?",a:"David Guetta",qt:"Which French DJ is world-famous for his electro hits?",at:"David Guetta",diff:"facile",c:["David Guetta","Martin Solveig","Daft Punk","Bob Sinclar"]},
+{q:"Qui est surnommé le 'Roi de la Pop' ?",a:"Michael Jackson",qt:"Who is nicknamed the 'King of Pop'?",at:"Michael Jackson",diff:"facile",c:["Michael Jackson","Prince","Elvis Presley","Justin Timberlake"]},
+{q:"Quelle chanteuse a sorti l'album '1989' ?",a:"Taylor Swift",qt:"Which singer released the album '1989'?",at:"Taylor Swift",diff:"facile",c:["Taylor Swift","Katy Perry","Lady Gaga","Ariana Grande"]},
+{q:"Qui chante 'Despacito' ?",a:"Luis Fonsi",qt:"Who sings 'Despacito'?",at:"Luis Fonsi",diff:"facile",c:["Luis Fonsi","Maluma","J Balvin","Bad Bunny"]},
+{q:"Qui chante 'Blinding Lights' ?",a:"The Weeknd",qt:"Who sings 'Blinding Lights'?",at:"The Weeknd",diff:"facile",c:["The Weeknd","Drake","Post Malone","Bruno Mars"]},
+{q:"Quelle chanteuse française a interprété 'La Vie en Rose' ?",a:"Édith Piaf",qt:"Which French singer performed 'La Vie en Rose'?",at:"Édith Piaf",diff:"facile",c:["Édith Piaf","Dalida","Mireille Mathieu","France Gall"]},
+{q:"Qui chante 'Bad Guy' ?",a:"Billie Eilish",qt:"Who sings 'Bad Guy'?",at:"Billie Eilish",diff:"facile",c:["Billie Eilish","Olivia Rodrigo","Ariana Grande","Dua Lipa"]},
+{q:"Quel groupe a chanté 'We Will Rock You' ?",a:"Queen",qt:"Which band sang 'We Will Rock You'?",at:"Queen",diff:"facile",c:["Queen","AC/DC","The Rolling Stones","Led Zeppelin"]},
+{q:"Dans quel pays est né Bob Marley ?",a:"Jamaïque",qt:"In which country was Bob Marley born?",at:"Jamaica",diff:"moyen",c:["Jamaïque","Barbade","Trinité-et-Tobago","Cuba"]},
+{q:"Qui a composé la Symphonie n°9 'Ode à la Joie' ?",a:"Beethoven",qt:"Who composed Symphony No. 9 ('Ode to Joy')?",at:"Beethoven",diff:"moyen",c:["Beethoven","Mozart","Bach","Brahms"]},
+{q:"Quel est le vrai nom de Lady Gaga ?",a:"Stefani Germanotta",qt:"What is Lady Gaga's real name?",at:"Stefani Germanotta",diff:"moyen",c:["Stefani Germanotta","Alicia Moore","Robyn Fenty","Belcalis Almánzar"]},
+{q:"Quel album des Beatles montre 4 membres sur un passage piéton ?",a:"Abbey Road",qt:"Which Beatles album shows 4 members on a crosswalk?",at:"Abbey Road",diff:"moyen",c:["Abbey Road","Sgt. Pepper's","Let It Be","Revolver"]},
+{q:"Quel rappeur américain est décédé en 1996 dans une fusillade ?",a:"Tupac Shakur",qt:"Which American rapper died in 1996 in a shooting?",at:"Tupac Shakur",diff:"moyen",c:["Tupac Shakur","Notorious B.I.G.","Eazy-E","Big Pun"]},
+{q:"Quel chanteur français est connu pour 'La Bohème' ?",a:"Charles Aznavour",qt:"Which French singer is known for 'La Bohème'?",at:"Charles Aznavour",diff:"moyen",c:["Charles Aznavour","Jacques Brel","Georges Brassens","Serge Gainsbourg"]},
+{q:"Quel est le vrai nom d'Eminem ?",a:"Marshall Mathers",qt:"What is Eminem's real name?",at:"Marshall Mathers",diff:"moyen",c:["Marshall Mathers","Curtis Jackson","Calvin Broadus","Aubrey Graham"]},
+{q:"Quel groupe a sorti 'Dark Side of the Moon' (1973) ?",a:"Pink Floyd",qt:"Which band released 'Dark Side of the Moon' (1973)?",at:"Pink Floyd",diff:"moyen",c:["Pink Floyd","Led Zeppelin","The Who","Genesis"]},
+{q:"Quelle chanteuse est connue pour 'Rolling in the Deep' ?",a:"Adele",qt:"Which singer is known for 'Rolling in the Deep'?",at:"Adele",diff:"moyen",c:["Adele","Amy Winehouse","Duffy","Ellie Goulding"]},
+{q:"Quel est le vrai nom de Stromae ?",a:"Paul Van Haver",qt:"What is Stromae's real name?",at:"Paul Van Haver",diff:"moyen",c:["Paul Van Haver","Stromae Dupont","Paul Hennart","Marc Dupont"]},
+{q:"Dans quel pays est née Céline Dion ?",a:"Canada",qt:"In which country was Céline Dion born?",at:"Canada",diff:"moyen",c:["Canada","France","Belgique","Suisse"]},
+{q:"Qui a composé 'Les Quatre Saisons' ?",a:"Vivaldi",qt:"Who composed 'The Four Seasons'?",at:"Vivaldi",diff:"difficile",c:["Vivaldi","Haydn","Scarlatti","Telemann"]},
+{q:"Dans quel pays est né Freddie Mercury ?",a:"Tanzanie",qt:"In which country was Freddie Mercury born?",at:"Tanzania",diff:"difficile",c:["Tanzanie","Inde","Pakistan","Kenya"],e:"Né Farrokh Bulsara à Zanzibar (Tanzanie) en 1946."},
+{q:"Quel groupe a sorti 'Nevermind' en 1991 ?",a:"Nirvana",qt:"Which band released 'Nevermind' in 1991?",at:"Nirvana",diff:"difficile",c:["Nirvana","Pearl Jam","Soundgarden","Alice in Chains"]},
+{q:"Qui a composé 'Rhapsody in Blue' ?",a:"George Gershwin",qt:"Who composed 'Rhapsody in Blue'?",at:"George Gershwin",diff:"difficile",c:["George Gershwin","Cole Porter","Duke Ellington","Irving Berlin"]},
+{q:"En quelle année les Beatles se sont-ils séparés ?",a:"1970",qt:"In which year did the Beatles break up?",at:"1970",diff:"difficile",c:["1970","1969","1972","1971"]},
+{q:"Quel musicien de jazz est surnommé 'Satchmo' ?",a:"Louis Armstrong",qt:"Which jazz musician is nicknamed 'Satchmo'?",at:"Louis Armstrong",diff:"difficile",c:["Louis Armstrong","Miles Davis","Duke Ellington","John Coltrane"]},
+{q:"Quel duo français de Daft Punk a composé 'Get Lucky' en 2013 ?",a:"Thomas Bangalter & Guy-Manuel",qt:"Which French duo composed 'Get Lucky' in 2013?",at:"Thomas Bangalter & Guy-Manuel (Daft Punk)",diff:"difficile",c:["Thomas Bangalter & Guy-Manuel","David Guetta & Sebastian","Justice & Cassius","Breakbot & Irfane"]},
+{q:"Quel musicien est à la fois guitariste des Rolling Stones depuis 1962 ?",a:"Keith Richards",qt:"Which musician has been a guitarist for the Rolling Stones since 1962?",at:"Keith Richards",diff:"difficile",c:["Keith Richards","Mick Jagger","Charlie Watts","Bill Wyman"]},
+{q:"Quel groupe suédois a chanté 'Dancing Queen' ?",a:"ABBA",qt:"Which Swedish band sang 'Dancing Queen'?",at:"ABBA",diff:"facile",c:["ABBA","Roxette","Ace of Base","Europe"]},
+{q:"Qui chante 'Levitating' (2020) ?",a:"Dua Lipa",qt:"Who sings 'Levitating' (2020)?",at:"Dua Lipa",diff:"facile",c:["Dua Lipa","Doja Cat","Ariana Grande","Camila Cabello"]},
+{q:"Quel rappeur français chante 'Sapés comme jamais' ?",a:"Maître Gims",qt:"Which French rapper sings 'Sapés comme jamais'?",at:"Maître Gims",diff:"moyen",c:["Maître Gims","Booba","Niska","Kaaris"]},
+],
+wtf:[
+{q:"Un coq au sommet d'un toit pond un œuf — de quel côté tombe-t-il ?",a:"Les coqs ne pondent pas !",qt:"A rooster at the top of a roof lays an egg — which side does it fall on?",at:"Roosters don't lay eggs!",diff:"facile",c:["Les coqs ne pondent pas !","À gauche","À droite","Dans la cour"],e:"Les coqs sont mâles, ils ne pondent pas."},
+{q:"Combien de mois de l'année ont 28 jours ?",a:"Les 12 !",qt:"How many months of the year have 28 days?",at:"All 12 of them!",diff:"facile",c:["Les 12 !","Seulement 1","Seulement 4","Seulement 2"],e:"Tous les mois ont au moins 28 jours."},
+{q:"Plus je sèche, plus je suis mouillé. Qui suis-je ?",a:"Une serviette",qt:"The more I dry, the wetter I get. What am I?",at:"A towel",diff:"facile",c:["Une serviette","Une éponge","Un chiffon","Un torchon"]},
+{q:"J'ai des dents mais je ne mords pas. Qui suis-je ?",a:"Un peigne",qt:"I have teeth but I don't bite. What am I?",at:"A comb",diff:"facile",c:["Un peigne","Une scie","Un râteau","Une fourchette"]},
+{q:"Qu'est-ce qui monte mais ne descend jamais ?",a:"L'âge",qt:"What goes up but never comes down?",at:"Age",diff:"facile",c:["L'âge","Le soleil","Le thermomètre","Un ascenseur"]},
+{q:"Plus on me retire, plus je suis grande. Qu'est-ce que je suis ?",a:"Un trou",qt:"The more you take from me, the bigger I get. What am I?",at:"A hole",diff:"facile",c:["Un trou","Une dette","Une tranchée","Une mine"]},
+{q:"Je parle toutes les langues mais je n'ai pas de langue. Qui suis-je ?",a:"Un dictionnaire",qt:"I speak every language but I have no tongue. What am I?",at:"A dictionary",diff:"facile",c:["Un dictionnaire","Un traducteur","Un perroquet","Une IA"]},
+{q:"Je suis plein de trous mais je retiens l'eau. Qui suis-je ?",a:"Une éponge",qt:"I'm full of holes but I still hold water. What am I?",at:"A sponge",diff:"facile",c:["Une éponge","Un gruyère","Un filet","Une passoire"]},
+{q:"Quel mot est toujours mal orthographié dans le dictionnaire ?",a:"Mal orthographié",qt:"Which word is always spelled wrong in the dictionary?",at:"'Wrong' itself",diff:"facile",c:["Mal orthographié","Orthographe","Erreur","Faute"]},
+{q:"Qu'est-ce qu'un facteur et un sac à main ont en commun ?",a:"Des lettres",qt:"What do a mailman and a handbag have in common?",at:"Letters",diff:"facile",c:["Des lettres","Des chiffres","Du plastique","De l'argent"]},
+{q:"Un avion s'écrase à la frontière franco-espagnole. Où enterre-t-on les survivants ?",a:"On n'enterre pas les survivants !",qt:"A plane crashes on the French-Spanish border. Where do you bury the survivors?",at:"You don't bury survivors!",diff:"moyen",c:["On n'enterre pas les survivants !","En France","En Espagne","À moitié des deux côtés"]},
+{q:"En France, peut-on légalement épouser une personne décédée ?",a:"Oui, c'est légal !",qt:"In France, can you legally marry someone who is deceased?",at:"Yes, it's legal!",diff:"moyen",c:["Oui, c'est légal !","Non, c'est interdit","Seulement pour les militaires","Uniquement si le juge l'accepte"],e:"Le mariage posthume est légal en France depuis 1959."},
+{q:"Deux pères et deux fils mangent 3 œufs, chacun mange un œuf. Comment ?",a:"Ils sont 3 : grand-père, père, fils",qt:"Two fathers and two sons eat 3 eggs, each eating one whole egg. How?",at:"There are only 3 people: grandfather, father, son",diff:"moyen",c:["Ils sont 3 : grand-père, père, fils","Un mange 2 œufs","Il y a 4 œufs","C'est impossible"]},
+{q:"Je commence par 'e', je finis par 'e', mais je ne contiens qu'une lettre. Qui suis-je ?",a:"Une enveloppe",qt:"I start with 'e', I end with 'e', but I only contain one letter. What am I?",at:"An envelope",diff:"moyen",c:["Une enveloppe","Une épée","Une étape","Une étoile"]},
+{q:"Si j'avais 4 pommes et que tu m'en prenais 3, combien en aurais-tu ?",a:"3",qt:"If I had 4 apples and you took 3 from me, how many would you have?",at:"3",diff:"moyen",c:["3","1","4","0"],e:"Tu m'as pris 3 pommes, donc tu en as 3."},
+{q:"Je suis toujours devant toi mais tu ne peux jamais me voir. Qui suis-je ?",a:"L'avenir",qt:"I'm always ahead of you but you can never see me. What am I?",at:"The future",diff:"moyen",c:["L'avenir","Ton dos","Ton ombre","Le passé"]},
+{q:"Un homme vit au 30e étage. Il monte toujours à pied à partir du 15e. Pourquoi ?",a:"Il est trop petit pour atteindre le bouton 30",qt:"A man lives on the 30th floor. He always walks up from the 15th floor. Why?",at:"He's too short to reach button 30",diff:"moyen",c:["Il est trop petit pour atteindre le bouton 30","Il veut se muscler","L'ascenseur ne monte pas plus haut","Il aime marcher"]},
+{q:"Plus je suis chaud, plus je refroidis vite. Qui suis-je ?",a:"Un café",qt:"The hotter I am, the faster I cool down. What am I?",at:"A cup of coffee",diff:"moyen",c:["Un café","La Terre","Un moteur","Un four"]},
+{q:"Qu'est-ce qu'on voit en second mais qui arrive en premier ?",a:"La lettre E dans 'second'",qt:"What do you see second but happens first?",at:"The letter 'e' in 'second'",diff:"difficile",c:["La lettre E dans 'second'","La place numéro 2","L'avant-dernier","Le deuxième étage"]},
+{q:"Je n'ai ni fenêtres ni portes. Si vous cassez mes murs, vous mangez mon trésor. Qui suis-je ?",a:"Un œuf",qt:"I have no windows or doors. If you break my walls, you'll eat my treasure. What am I?",at:"An egg",diff:"difficile",c:["Un œuf","Une noix","Un coffre-fort","Une banque"]},
+{q:"Je peux courir mais je n'ai pas de jambes, j'ai une bouche mais je ne parle pas. Qui suis-je ?",a:"Une rivière",qt:"I can run but have no legs, I have a mouth but I never speak. What am I?",at:"A river",diff:"difficile",c:["Une rivière","Le vent","La pluie","Une route"]},
+{q:"Plus on se rapproche de moi, plus je m'éloigne. Qui suis-je ?",a:"L'horizon",qt:"The closer you get to me, the further away I move. What am I?",at:"The horizon",diff:"difficile",c:["L'horizon","Un miroir","L'avenir","L'arc-en-ciel"]},
+{q:"Je parle sans bouche, j'entends sans oreilles. Je prends vie avec le vent. Qui suis-je ?",a:"Un écho",qt:"I speak without a mouth, I hear without ears. I come alive with the wind. What am I?",at:"An echo",diff:"difficile",c:["Un écho","Un fantôme","La radio","La conscience"]},
+{q:"Je suis léger comme une plume, mais le plus fort homme du monde ne peut me tenir plus d'une minute. Qui suis-je ?",a:"Son souffle",qt:"I'm as light as a feather, yet the strongest man can't hold me for more than a minute. What am I?",at:"His breath",diff:"difficile",c:["Son souffle","Une pensée","Une bulle","La lumière"]},
+{q:"Qu'est-ce qu'on coupe sans couteau, qu'on voit sans yeux et qu'on met dans son café sans sucre ?",a:"Ses dents / un sourire",qt:"What do you cut without a knife, see without eyes, and put in your coffee without sugar?",at:"A smile / your teeth",diff:"difficile",c:["Ses dents / un sourire","La parole","Une grimace","Le silence"]},
+{q:"Quel est le comble pour un marin ?",a:"D'avoir le mal de mer",qt:"What's the irony for a sailor?",at:"Getting seasick",diff:"facile",c:["D'avoir le mal de mer","D'aimer l'eau","D'avoir peur des bateaux","De ne pas savoir nager"]},
+{q:"Je grandis quand on me retourne. Qui suis-je ?",a:"Un sablier",qt:"I grow bigger when you turn me over. What am I?",at:"An hourglass",diff:"moyen",c:["Un sablier","Une horloge","Un calendrier","Une montre"]},
+{q:"Pourquoi les pompiers portent-ils des bretelles rouges ?",a:"Pour tenir leur pantalon !",qt:"Why do firefighters wear red suspenders?",at:"To hold up their pants!",diff:"facile",c:["Pour tenir leur pantalon !","Pour être visible","Pour la mode","Aucune raison spécifique"]},
+{q:"Quel mot devient son contraire si on ajoute un 'in' devant ?",a:"Plusieurs réponses possibles (ex: capable/incapable)",qt:"Which word becomes its opposite if you add 'in' in front of it?",at:"Several answers possible (e.g. capable/incapable)",diff:"moyen",c:["Capable/Incapable","Possible/Impossible","Connu/Inconnu","Toutes ces réponses"]},
+],
+apero:[
+{q:"Comment s'appelle le cocktail vodka + jus d'orange ?",a:"Screwdriver",qt:"What is the cocktail of vodka + orange juice called?",at:"Screwdriver",diff:"facile",c:["Screwdriver","Harvey Wallbanger","Sex on the Beach","Tequila Sunrise"]},
+{q:"Quel est l'apéritif anisé du sud de la France ?",a:"Pastis",qt:"What is the anise-flavored aperitif from southern France?",at:"Pastis",diff:"facile",c:["Pastis","Ricard","Pernod","Anisette"],e:"Le Ricard et le Pastis 51 sont des marques de pastis."},
+{q:"Quel alcool est la base du mojito ?",a:"Rhum",qt:"Which spirit is the base of a mojito?",at:"Rum",diff:"facile",c:["Rhum","Vodka","Gin","Tequila"]},
+{q:"Dans quel pays fabrique-t-on la tequila ?",a:"Mexique",qt:"In which country is tequila made?",at:"Mexico",diff:"facile",c:["Mexique","Espagne","Argentine","Colombie"]},
+{q:"Quel fromage produit en Normandie a une croûte blanche fleurie ?",a:"Camembert",qt:"Which cheese made in Normandy has a white bloomy rind?",at:"Camembert",diff:"facile",c:["Camembert","Brie","Munster","Reblochon"]},
+{q:"Quelle est la base d'un guacamole ?",a:"Avocat",qt:"What is the main ingredient of guacamole?",at:"Avocado",diff:"facile",c:["Avocat","Concombre","Courgette","Artichaut"]},
+{q:"Quel pays est célèbre pour ses sushis ?",a:"Japon",qt:"Which country is famous for sushi?",at:"Japan",diff:"facile",c:["Japon","Chine","Corée","Vietnam"]},
+{q:"Quel cocktail contient du Champagne et du jus de pêche ?",a:"Bellini",qt:"Which cocktail contains Champagne and peach juice?",at:"Bellini",diff:"facile",c:["Bellini","Kir Royal","Aperol Spritz","Mimosa"]},
+{q:"Quelle épice donne une couleur jaune-orangé au curry ?",a:"Curcuma",qt:"Which spice gives curry its yellow-orange color?",at:"Turmeric",diff:"facile",c:["Curcuma","Safran","Paprika","Cumin"]},
+{q:"Quel fromage est troué et vient de Suisse ?",a:"Emmental",qt:"Which holey cheese comes from Switzerland?",at:"Emmental",diff:"facile",c:["Emmental","Gruyère","Raclette","Comté"],e:"Les trous de l'Emmental sont créés par des bactéries produisant du CO2."},
+{q:"Dans quelle région de France produit-on le Cognac ?",a:"Charente",qt:"In which French region is Cognac produced?",at:"Charente",diff:"moyen",c:["Charente","Bourgogne","Bordeaux","Champagne"]},
+{q:"Quelle est l'origine du croissant ?",a:"Autriche",qt:"What is the origin of the croissant?",at:"Austria",diff:"moyen",c:["Autriche","France","Hongrie","Pologne"],e:"Le croissant vient de Vienne. Marie-Antoinette l'aurait introduit en France."},
+{q:"Dans quelle ville italienne est née la pizza ?",a:"Naples",qt:"In which Italian city was pizza born?",at:"Naples",diff:"moyen",c:["Naples","Rome","Milan","Palerme"]},
+{q:"Qu'est-ce que le Kimchi, plat coréen célèbre ?",a:"Chou fermenté épicé",qt:"What is kimchi, a famous Korean dish?",at:"Spicy fermented cabbage",diff:"moyen",c:["Chou fermenté épicé","Riz gluant grillé","Soupe de nouilles","Viande marinée"]},
+{q:"Quel cocktail contient rhum, citron vert, menthe et eau gazeuse ?",a:"Mojito",qt:"Which cocktail contains rum, lime, mint and soda water?",at:"Mojito",diff:"moyen",c:["Mojito","Caipirinha","Daiquiri","Cuba Libre"]},
+{q:"Qu'est-ce qu'un Negroni ?",a:"Gin, Campari et vermouth rouge",qt:"What is a Negroni?",at:"Gin, Campari and red vermouth",diff:"moyen",c:["Gin, Campari et vermouth rouge","Vodka, Campari et pamplemousse","Tequila, Triple sec et citron","Rhum, Amaretto et cola"]},
+{q:"Quel épice est plus cher que l'or par gramme ?",a:"Le safran",qt:"Which spice is more expensive than gold by weight?",at:"Saffron",diff:"moyen",c:["Le safran","La vanille","La cardamome","Le poivre long"],e:"Le safran peut coûter jusqu'à 30 000 euros le kilo."},
+{q:"Comment appelle-t-on les petites portions espagnoles à l'apéro ?",a:"Tapas",qt:"What are small Spanish appetizer portions called?",at:"Tapas",diff:"moyen",c:["Tapas","Pintxos","Mezze","Antipasti"]},
+{q:"Qu'est-ce que l'umami, la cinquième saveur ?",a:"Le goût du glutamate (savoureux)",qt:"What is umami, the fifth taste?",at:"The savory taste of glutamate",diff:"difficile",c:["Le goût du glutamate (savoureux)","Une épice japonaise","Un type de champignon","Un plat coréen"]},
+{q:"Quel champagne est le plus vendu dans le monde ?",a:"Moët & Chandon",qt:"Which champagne is the best-selling in the world?",at:"Moët & Chandon",diff:"difficile",c:["Moët & Chandon","Veuve Clicquot","Dom Pérignon","Ruinart"]},
+{q:"Quelle levure crée le vrai pain au levain ?",a:"Levain naturel (fermentation lactique)",qt:"Which yeast creates true sourdough bread?",at:"Natural sourdough starter (wild fermentation)",diff:"difficile",c:["Levain naturel","Levure boulangère","Bicarbonate","Levure chimique"]},
+{q:"Quel est le cru de Bourgogne considéré comme le plus prestigieux ?",a:"Romanée-Conti",qt:"Which Burgundy vineyard is considered the most prestigious?",at:"Romanée-Conti",diff:"difficile",c:["Romanée-Conti","Montrachet","Chambertin","Musigny"]},
+{q:"Qu'est-ce qu'un millésime en œnologie ?",a:"L'année de récolte des raisins",qt:"What is a vintage in winemaking?",at:"The year the grapes were harvested",diff:"difficile",c:["L'année de récolte des raisins","Le cépage utilisé","Le domaine producteur","La méthode d'élevage"]},
+{q:"Quel alcool est distillé à partir d'agave bleu ?",a:"Tequila",qt:"Which spirit is distilled from blue agave?",at:"Tequila",diff:"difficile",c:["Tequila","Mezcal","Pulque","Sotol"],e:"Seul l'agave bleu Weber peut produire la tequila officielle."},
+{q:"Quel pays est le plus grand producteur de vin au monde ?",a:"Italie",qt:"Which country is the largest wine producer in the world?",at:"Italy",diff:"moyen",c:["Italie","France","Espagne","États-Unis"]},
+{q:"Quel ingrédient principal compose le houmous ?",a:"Pois chiches",qt:"What is the main ingredient of hummus?",at:"Chickpeas",diff:"facile",c:["Pois chiches","Lentilles","Haricots blancs","Fèves"]},
+{q:"Quel cocktail contient gin, citron vert et eau tonique ?",a:"Gin Tonic",qt:"Which cocktail contains gin, lime and tonic water?",at:"Gin and Tonic",diff:"facile",c:["Gin Tonic","Negroni","Tom Collins","Gimlet"]},
+{q:"Quel pays a inventé le fromage Roquefort ?",a:"France",qt:"Which country invented Roquefort cheese?",at:"France",diff:"facile",c:["France","Italie","Espagne","Suisse"]},
+],
+histoire:[
+{q:"En quelle année la Révolution française a-t-elle commencé ?",a:"1789",qt:"In which year did the French Revolution begin?",at:"1789",diff:"facile",c:["1789","1793","1776","1815"]},
+{q:"Qui était le premier président des États-Unis ?",a:"George Washington",qt:"Who was the first president of the United States?",at:"George Washington",diff:"facile",c:["George Washington","John Adams","Thomas Jefferson","Benjamin Franklin"]},
+{q:"Dans quel pays Adolf Hitler est-il né ?",a:"Autriche",qt:"In which country was Adolf Hitler born?",at:"Austria",diff:"facile",c:["Autriche","Allemagne","Pologne","Tchécoslovaquie"]},
+{q:"En quelle année le mur de Berlin est-il tombé ?",a:"1989",qt:"In which year did the Berlin Wall fall?",at:"1989",diff:"facile",c:["1989","1991","1987","1993"]},
+{q:"Qui a découvert l'Amérique selon l'histoire européenne ?",a:"Christophe Colomb",qt:"Who discovered America according to European history?",at:"Christopher Columbus",diff:"facile",c:["Christophe Colomb","Amerigo Vespucci","Vasco de Gama","Magellan"]},
+{q:"Qui était Napoléon Bonaparte ?",a:"Empereur des Français",qt:"Who was Napoleon Bonaparte?",at:"Emperor of the French",diff:"facile",c:["Empereur des Français","Roi de France","Premier Consul","Général en chef"]},
+{q:"En quelle année a débuté la Première Guerre mondiale ?",a:"1914",qt:"In which year did World War I begin?",at:"1914",diff:"facile",c:["1914","1916","1912","1939"]},
+{q:"Qui a été le premier homme à marcher sur la Lune ?",a:"Neil Armstrong",qt:"Who was the first man to walk on the Moon?",at:"Neil Armstrong",diff:"facile",c:["Neil Armstrong","Buzz Aldrin","Yuri Gagarin","John Glenn"]},
+{q:"Quel pays a lancé le premier satellite dans l'espace (Spoutnik) ?",a:"URSS",qt:"Which country launched the first satellite into space (Sputnik)?",at:"USSR",diff:"facile",c:["URSS","États-Unis","Chine","France"]},
+{q:"Quel roi de France a été guillotiné pendant la Révolution ?",a:"Louis XVI",qt:"Which French king was guillotined during the Revolution?",at:"Louis XVI",diff:"facile",c:["Louis XVI","Louis XV","Louis XVIII","Charles X"]},
+{q:"En quelle année Abraham Lincoln a-t-il été assassiné ?",a:"1865",qt:"In which year was Abraham Lincoln assassinated?",at:"1865",diff:"moyen",c:["1865","1864","1869","1863"]},
+{q:"En quelle année Christophe Colomb a-t-il atteint les Amériques ?",a:"1492",qt:"In which year did Christopher Columbus reach the Americas?",at:"1492",diff:"moyen",c:["1492","1498","1488","1504"]},
+{q:"Quelle bataille Napoléon a-t-il perdue en 1815 ?",a:"Waterloo",qt:"Which battle did Napoleon lose in 1815?",at:"Waterloo",diff:"moyen",c:["Waterloo","Trafalgar","Leipzig","Borodino"]},
+{q:"Qui était Premier ministre du Royaume-Uni pendant la 2e Guerre mondiale ?",a:"Winston Churchill",qt:"Who was Prime Minister of the United Kingdom during WWII?",at:"Winston Churchill",diff:"moyen",c:["Winston Churchill","Neville Chamberlain","Clement Attlee","Lloyd George"]},
+{q:"En quelle année l'Union soviétique s'est-elle dissoute ?",a:"1991",qt:"In which year did the Soviet Union dissolve?",at:"1991",diff:"moyen",c:["1991","1989","1993","1985"]},
+{q:"Quel événement a déclenché la Première Guerre mondiale ?",a:"L'assassinat de l'Archiduc François-Ferdinand",qt:"What event triggered World War I?",at:"The assassination of Archduke Franz Ferdinand",diff:"moyen",c:["L'assassinat de l'Archiduc François-Ferdinand","L'invasion de la Belgique","La mobilisation allemande","Le coup de Sarajevo"]},
+{q:"En quelle année la Seconde Guerre mondiale s'est-elle terminée ?",a:"1945",qt:"In which year did World War II end?",at:"1945",diff:"moyen",c:["1945","1944","1946","1943"]},
+{q:"Qui était le leader de la Révolution cubaine ?",a:"Fidel Castro",qt:"Who was the leader of the Cuban Revolution?",at:"Fidel Castro",diff:"moyen",c:["Fidel Castro","Che Guevara","Raúl Castro","Camilo Cienfuegos"]},
+{q:"Qui a fondé l'Empire mongol au XIIIe siècle ?",a:"Gengis Khan",qt:"Who founded the Mongol Empire in the 13th century?",at:"Genghis Khan",diff:"moyen",c:["Gengis Khan","Tamerlan","Kubilai Khan","Ögedei Khan"]},
+{q:"En quelle année la Déclaration des Droits de l'Homme a-t-elle été adoptée ?",a:"1789",qt:"In which year was the Declaration of the Rights of Man adopted?",at:"1789",diff:"moyen",c:["1789","1791","1793","1799"]},
+{q:"En quelle année Martin Luther King Jr. a-t-il été assassiné ?",a:"1968",qt:"In which year was Martin Luther King Jr. assassinated?",at:"1968",diff:"difficile",c:["1968","1965","1963","1970"]},
+{q:"En quelle année l'Apartheid a-t-il officiellement pris fin en Afrique du Sud ?",a:"1994",qt:"In which year did Apartheid officially end in South Africa?",at:"1994",diff:"difficile",c:["1994","1990","1992","1996"],e:"Les premières élections multiraciales eurent lieu le 27 avril 1994."},
+{q:"Qui était le premier secrétaire général des Nations Unies ?",a:"Trygve Lie",qt:"Who was the first Secretary-General of the United Nations?",at:"Trygve Lie",diff:"difficile",c:["Trygve Lie","Dag Hammarskjöld","U Thant","Kurt Waldheim"]},
+{q:"Quel était le vrai prénom de Staline ?",a:"Iossif (Joseph)",qt:"What was Stalin's real first name?",at:"Iosif (Joseph)",diff:"difficile",c:["Iossif","Vladimir","Nikolaï","Ivan"],e:"Iossif Vissarionovitch Djougachvili, dit Staline = 'homme d'acier'."},
+{q:"Quelle est la date de la prise de Constantinople par les Ottomans ?",a:"1453",qt:"What is the date of the fall of Constantinople to the Ottomans?",at:"1453",diff:"difficile",c:["1453","1492","1389","1444"],e:"29 mai 1453 : Mehmed II prend Constantinople, fin de l'Empire byzantin."},
+{q:"Qui a été le premier Premier ministre de l'Inde indépendante ?",a:"Jawaharlal Nehru",qt:"Who was the first Prime Minister of independent India?",at:"Jawaharlal Nehru",diff:"difficile",c:["Jawaharlal Nehru","Mahatma Gandhi","Indira Gandhi","Sardar Patel"]},
+{q:"En quelle année a eu lieu la Révolution russe qui renversa le Tsar ?",a:"1917",qt:"In which year did the Russian Revolution overthrow the Tsar?",at:"1917",diff:"difficile",c:["1917","1905","1918","1920"]},
+{q:"Quel traité a mis fin à la Première Guerre mondiale ?",a:"Traité de Versailles",qt:"Which treaty ended World War I?",at:"The Treaty of Versailles",diff:"difficile",c:["Traité de Versailles","Traité de Paris","Traité de Trianon","Traité de Sèvres"],e:"Signé le 28 juin 1919 au château de Versailles."},
+{q:"Quel pays a colonisé le plus grand territoire dans l'histoire ?",a:"Royaume-Uni",qt:"Which country colonized the largest territory in history?",at:"United Kingdom",diff:"difficile",c:["Royaume-Uni","Espagne","France","Portugal"]},
+{q:"Quel empereur romain a légalisé le christianisme en 313 ?",a:"Constantin Ier",qt:"Which Roman emperor legalized Christianity in 313?",at:"Constantine I",diff:"difficile",c:["Constantin Ier","Néron","Auguste","Justinien"]},
+{q:"En quelle année a eu lieu le débarquement de Normandie ?",a:"1944",qt:"In which year did the D-Day landings in Normandy take place?",at:"1944",diff:"facile",c:["1944","1943","1945","1942"]},
+{q:"Quel roi de France est surnommé le 'Roi Soleil' ?",a:"Louis XIV",qt:"Which French king is nicknamed the 'Sun King'?",at:"Louis XIV",diff:"facile",c:["Louis XIV","Louis XV","Louis XIII","François Ier"]},
+],
+sciences:[
+{q:"Quelle planète est la plus proche du Soleil ?",a:"Mercure",qt:"Which planet is closest to the Sun?",at:"Mercury",diff:"facile",c:["Mercure","Vénus","Mars","Terre"]},
+{q:"De quoi est composée l'eau ?",a:"Hydrogène et Oxygène",qt:"What is water made of?",at:"Hydrogen and Oxygen",diff:"facile",c:["Hydrogène et Oxygène","Azote et Oxygène","Carbone et Hydrogène","Calcium et Phosphore"]},
+{q:"Quelle est la planète la plus grande du système solaire ?",a:"Jupiter",qt:"Which is the largest planet in the solar system?",at:"Jupiter",diff:"facile",c:["Jupiter","Saturne","Uranus","Neptune"]},
+{q:"Qui a développé la théorie de la relativité ?",a:"Einstein",qt:"Who developed the theory of relativity?",at:"Einstein",diff:"facile",c:["Einstein","Newton","Darwin","Curie"]},
+{q:"Quel est l'organe le plus grand du corps humain ?",a:"La peau",qt:"What is the largest organ in the human body?",at:"The skin",diff:"facile",c:["La peau","Le foie","Les poumons","L'intestin"]},
+{q:"Combien y a-t-il d'os dans le corps humain adulte ?",a:"206",qt:"How many bones does an adult human body have?",at:"206",diff:"facile",c:["206","208","212","198"]},
+{q:"Qui a découvert la gravité grâce à une pomme (selon la légende) ?",a:"Newton",qt:"Who discovered gravity thanks to an apple (according to legend)?",at:"Newton",diff:"facile",c:["Newton","Einstein","Galilée","Archimède"]},
+{q:"Quel est le gaz le plus abondant dans l'atmosphère terrestre ?",a:"Azote",qt:"What is the most abundant gas in Earth's atmosphere?",at:"Nitrogen",diff:"facile",c:["Azote","Oxygène","Dioxyde de carbone","Argon"],e:"L'atmosphère est composée à 78% d'azote et 21% d'oxygène."},
+{q:"Quelle planète est surnommée la 'Planète rouge' ?",a:"Mars",qt:"Which planet is nicknamed the 'Red Planet'?",at:"Mars",diff:"facile",c:["Mars","Jupiter","Saturne","Vénus"]},
+{q:"Combien y a-t-il de planètes dans le système solaire ?",a:"8",qt:"How many planets are there in the solar system?",at:"8",diff:"facile",c:["8","9","10","7"],e:"Pluton a été reclassée en planète naine en 2006."},
+{q:"Qui a découvert la pénicilline ?",a:"Alexander Fleming",qt:"Who discovered penicillin?",at:"Alexander Fleming",diff:"moyen",c:["Alexander Fleming","Louis Pasteur","Marie Curie","Edward Jenner"]},
+{q:"Quel est le symbole chimique de l'or ?",a:"Au",qt:"What is the chemical symbol for gold?",at:"Au",diff:"moyen",c:["Au","Or","Go","Ag"],e:"Au vient du latin 'aurum'."},
+{q:"Quelle est la vitesse de la lumière (approximative) ?",a:"300 000 km/s",qt:"What is the (approximate) speed of light?",at:"300,000 km/s",diff:"moyen",c:["300 000 km/s","30 000 km/s","3 000 000 km/s","150 000 km/s"]},
+{q:"De quoi est composé le noyau de l'atome ?",a:"Protons et neutrons",qt:"What makes up the nucleus of an atom?",at:"Protons and neutrons",diff:"moyen",c:["Protons et neutrons","Électrons et protons","Neutrons seuls","Quarks et bosons"]},
+{q:"Quelle est la température d'ébullition de l'eau au niveau de la mer ?",a:"100°C",qt:"What is the boiling temperature of water at sea level?",at:"100°C",diff:"moyen",c:["100°C","95°C","110°C","98°C"]},
+{q:"Quel est le plus grand organe interne du corps humain ?",a:"Le foie",qt:"What is the largest internal organ in the human body?",at:"The liver",diff:"moyen",c:["Le foie","Les poumons","L'estomac","L'intestin grêle"]},
+{q:"Qu'est-ce qu'un trou noir ?",a:"Une région dont la gravité empêche la lumière d'en sortir",qt:"What is a black hole?",at:"A region whose gravity prevents even light from escaping",diff:"moyen",c:["Une région dont la gravité empêche la lumière d'en sortir","Un espace vide entre galaxies","Une étoile en explosion","Un astre sans lumière"]},
+{q:"En quelle année Einstein a-t-il publié la théorie de la relativité générale ?",a:"1915",qt:"In which year did Einstein publish the general theory of relativity?",at:"1915",diff:"moyen",c:["1915","1905","1919","1921"],e:"La relativité restreinte date de 1905, la générale de 1915."},
+{q:"Qui est Marie Curie dans l'histoire des sciences ?",a:"Première femme Prix Nobel (physique puis chimie)",qt:"Who is Marie Curie in the history of science?",at:"First woman to win a Nobel Prize (physics, then chemistry)",diff:"moyen",c:["Première femme Prix Nobel","Inventrice de l'électricité","Découvreuse de l'ADN","Créatrice de la vaccination"]},
+{q:"Quelle force maintient les planètes en orbite autour du Soleil ?",a:"La gravité",qt:"Which force keeps the planets in orbit around the Sun?",at:"Gravity",diff:"moyen",c:["La gravité","Le magnétisme","L'inertie","La force nucléaire"]},
+{q:"Quel est l'élément le plus abondant dans l'univers ?",a:"Hydrogène",qt:"Which is the most abundant element in the universe?",at:"Hydrogen",diff:"difficile",c:["Hydrogène","Hélium","Oxygène","Carbone"],e:"L'hydrogène représente environ 75% de la masse de l'univers."},
+{q:"Qu'est-ce que le paradoxe du chat de Schrödinger illustre ?",a:"La superposition quantique",qt:"What does Schrödinger's cat paradox illustrate?",at:"Quantum superposition",diff:"difficile",c:["La superposition quantique","La relativité du temps","Le paradoxe des jumeaux","L'incertitude d'Heisenberg"]},
+{q:"Quel est le nom du télescope spatial lancé fin 2021 ?",a:"James Webb",qt:"What is the name of the space telescope launched in late 2021?",at:"James Webb",diff:"difficile",c:["James Webb","Hubble II","Chandra X-ray","Spitzer II"],e:"Lancé le 25 décembre 2021, successeur du télescope Hubble."},
+{q:"Quelle est la formule chimique du glucose ?",a:"C6H12O6",qt:"What is the chemical formula of glucose?",at:"C6H12O6",diff:"difficile",c:["C6H12O6","C12H22O11","CH2O","C2H5OH"]},
+{q:"Quel est le nom de la particule qui confère sa masse à la matière ?",a:"Boson de Higgs",qt:"What is the name of the particle that gives matter its mass?",at:"Higgs boson",diff:"difficile",c:["Boson de Higgs","Graviton","Neutrino","Muon"],e:"Découvert au CERN en 2012, surnommé la 'particule de Dieu'."},
+{q:"Quelle loi stipule que F = ma ?",a:"La 2e loi de Newton",qt:"Which law states that F = ma?",at:"Newton's second law",diff:"difficile",c:["La 2e loi de Newton","La 1ère loi de Newton","La 3e loi de Newton","La loi de la gravitation"]},
+{q:"Quel scientifique a nommé les éléments oxygène et hydrogène ?",a:"Antoine Lavoisier",qt:"Which scientist named the elements oxygen and hydrogen?",at:"Antoine Lavoisier",diff:"difficile",c:["Antoine Lavoisier","John Dalton","Dmitri Mendeleïev","Humphry Davy"]},
+{q:"Combien y a-t-il approximativement d'étoiles dans la Voie Lactée ?",a:"200 à 400 milliards",qt:"Approximately how many stars are there in the Milky Way?",at:"200 to 400 billion",diff:"difficile",c:["200 à 400 milliards","2 à 4 milliards","2 à 4 trillions","20 à 40 millions"]},
+{q:"Quel est le métal le plus conducteur d'électricité ?",a:"L'argent",qt:"What is the most electrically conductive metal?",at:"Silver",diff:"difficile",c:["L'argent","Le cuivre","L'or","L'aluminium"]},
+{q:"Combien de chromosomes possède l'être humain ?",a:"46",qt:"How many chromosomes does a human have?",at:"46",diff:"moyen",c:["46","44","48","42"]},
+{q:"Quel est le plus petit os du corps humain ?",a:"L'étrier (dans l'oreille)",qt:"What is the smallest bone in the human body?",at:"The stapes (in the ear)",diff:"difficile",c:["L'étrier (oreille)","Le tibia","Le radius","La phalange"]},
+],
+series:[
+{q:"Dans quelle série trouve-t-on les personnages Ross, Monica et Chandler ?",a:"Friends",qt:"In which series do we find the characters Ross, Monica and Chandler?",at:"Friends",diff:"facile",c:["Friends","How I Met Your Mother","The Big Bang Theory","Modern Family"]},
+{q:"Quelle série Netflix met en scène des enfants et l'Upside Down ?",a:"Stranger Things",qt:"Which Netflix series features kids and the Upside Down?",at:"Stranger Things",diff:"facile",c:["Stranger Things","Dark","The OA","Lost"]},
+{q:"Dans quelle série un chimiste devient fabricant de drogue ?",a:"Breaking Bad",qt:"In which series does a chemistry teacher become a drug manufacturer?",at:"Breaking Bad",diff:"facile",c:["Breaking Bad","Narcos","Ozark","The Wire"]},
+{q:"Quelle série met en scène les familles Stark et Lannister ?",a:"Game of Thrones",qt:"Which series features the Stark and Lannister families?",at:"Game of Thrones",diff:"facile",c:["Game of Thrones","The Witcher","Vikings","Merlin"]},
+{q:"Quelle série espagnole sur Netflix met en scène un braquage de banque ?",a:"La Casa de Papel",qt:"Which Spanish Netflix series features a bank heist?",at:"Money Heist (La Casa de Papel)",diff:"facile",c:["La Casa de Papel","Elite","Vis a Vis","Gran Hotel"]},
+{q:"Qui joue Daenerys Targaryen dans Game of Thrones ?",a:"Emilia Clarke",qt:"Who plays Daenerys Targaryen in Game of Thrones?",at:"Emilia Clarke",diff:"facile",c:["Emilia Clarke","Sophie Turner","Maisie Williams","Natalie Dormer"]},
+{q:"Quelle série coréenne de Netflix a battu tous les records en 2021 ?",a:"Squid Game",qt:"Which Korean Netflix series broke all records in 2021?",at:"Squid Game",diff:"facile",c:["Squid Game","All of Us Are Dead","Kingdom","Sweet Home"]},
+{q:"Dans quelle série des zombies envahissent l'Amérique ?",a:"The Walking Dead",qt:"In which series do zombies invade America?",at:"The Walking Dead",diff:"facile",c:["The Walking Dead","The Last of Us","Fear the Walking Dead","Z Nation"]},
+{q:"Quelle actrice joue Carrie Bradshaw dans Sex and the City ?",a:"Sarah Jessica Parker",qt:"Which actress plays Carrie Bradshaw in Sex and the City?",at:"Sarah Jessica Parker",diff:"facile",c:["Sarah Jessica Parker","Kim Cattrall","Cynthia Nixon","Kristin Davis"]},
+{q:"Quelle série se déroule dans un hôpital à Seattle et met en scène des chirurgiens ?",a:"Grey's Anatomy",qt:"Which series is set in a hospital in Seattle and follows surgeons?",at:"Grey's Anatomy",diff:"facile",c:["Grey's Anatomy","House MD","ER Urgences","Chicago Med"]},
+{q:"En quelle année a débuté la série Friends ?",a:"1994",qt:"In which year did Friends premiere?",at:"1994",diff:"moyen",c:["1994","1992","1996","1998"]},
+{q:"Quel acteur joue Walter White dans Breaking Bad ?",a:"Bryan Cranston",qt:"Which actor plays Walter White in Breaking Bad?",at:"Bryan Cranston",diff:"moyen",c:["Bryan Cranston","Aaron Paul","Jonathan Banks","Dean Norris"]},
+{q:"Dans quelle série un bureau travaille dans la papeterie Dunder Mifflin ?",a:"The Office",qt:"In which series does an office work at the Dunder Mifflin paper company?",at:"The Office",diff:"moyen",c:["The Office","Parks and Recreation","30 Rock","Community"]},
+{q:"Quel acteur joue Sherlock Holmes dans la série BBC ?",a:"Benedict Cumberbatch",qt:"Which actor plays Sherlock Holmes in the BBC series?",at:"Benedict Cumberbatch",diff:"moyen",c:["Benedict Cumberbatch","Martin Freeman","Jonny Lee Miller","Ian Hart"]},
+{q:"Dans quelle série des femmes sont réduites en servantes dans une théocratie ?",a:"La Servante Écarlate",qt:"In which series are women reduced to servants in a theocracy?",at:"The Handmaid's Tale",diff:"moyen",c:["La Servante Écarlate","Westworld","Years and Years","Black Mirror"]},
+{q:"Quelle série se déroule dans une agence de publicité américaine des années 60 ?",a:"Mad Men",qt:"Which series is set in an American advertising agency in the 1960s?",at:"Mad Men",diff:"moyen",c:["Mad Men","Pan Am","The Americans","Halt and Catch Fire"]},
+{q:"Quel personnage de The Wire est joué par Idris Elba ?",a:"Stringer Bell",qt:"Which character in The Wire is played by Idris Elba?",at:"Stringer Bell",diff:"moyen",c:["Stringer Bell","Omar Little","McNulty","Avon Barksdale"]},
+{q:"Dans quelle série un expert en légistique aide la police à Miami ?",a:"Dexter",qt:"In which series does a forensic expert help the police in Miami?",at:"Dexter",diff:"moyen",c:["Dexter","CSI Miami","Bones","Hannibal"]},
+{q:"Quelle série met en scène une famille de criminels qui blanchit de l'argent dans l'Ozark ?",a:"Ozark",qt:"Which series features a family of criminals laundering money in the Ozarks?",at:"Ozark",diff:"moyen",c:["Ozark","Bloodline","Rectify","The Americans"]},
+{q:"En quelle année a débuté la série des Sopranos ?",a:"1999",qt:"In which year did The Sopranos premiere?",at:"1999",diff:"moyen",c:["1999","2001","1997","2003"]},
+{q:"Quel acteur joue Tony Soprano dans Les Sopranos ?",a:"James Gandolfini",qt:"Which actor plays Tony Soprano in The Sopranos?",at:"James Gandolfini",diff:"difficile",c:["James Gandolfini","Steve Carell","Michael Imperioli","Tony Sirico"]},
+{q:"Qui est le créateur de la série Twin Peaks ?",a:"David Lynch et Mark Frost",qt:"Who created the series Twin Peaks?",at:"David Lynch and Mark Frost",diff:"difficile",c:["David Lynch et Mark Frost","David Lynch seul","J.J. Abrams","Shonda Rhimes"]},
+{q:"Combien de saisons compte Breaking Bad ?",a:"5",qt:"How many seasons does Breaking Bad have?",at:"5",diff:"difficile",c:["5","6","4","7"]},
+{q:"Quelle série HBO met en scène des androïdes dans un parc d'attractions ?",a:"Westworld",qt:"Which HBO series features androids in a theme park?",at:"Westworld",diff:"difficile",c:["Westworld","Humans","Altered Carbon","Devs"]},
+{q:"Quelle série met en scène un avocat de la ville d'Albuquerque ami de Walter White ?",a:"Better Call Saul",qt:"Which series features a lawyer in Albuquerque who is friends with Walter White?",at:"Better Call Saul",diff:"difficile",c:["Better Call Saul","Breaking Bad","Suits","The Good Wife"]},
+{q:"Quelle série américaine de 2013 met en scène les coulisses d'une maison de cartes politique ?",a:"House of Cards",qt:"Which 2013 American series shows the inner workings of a political house of cards?",at:"House of Cards",diff:"difficile",c:["House of Cards","Designated Survivor","The West Wing","Veep"]},
+{q:"Quelle série française met en scène le braquage du Louvre ?",a:"Lupin",qt:"Which French series features the Louvre heist?",at:"Lupin",diff:"facile",c:["Lupin","Le Bureau des Légendes","Dix Pour Cent","Engrenages"]},
+{q:"Quel acteur joue Jon Snow dans Game of Thrones ?",a:"Kit Harington",qt:"Which actor plays Jon Snow in Game of Thrones?",at:"Kit Harington",diff:"moyen",c:["Kit Harington","Richard Madden","Alfie Allen","Joe Dempsie"]},
+{q:"Quelle série met en scène un robot tueur envoyé du futur ?",a:"Terminator: The Sarah Connor Chronicles",qt:"Which series features a killer robot sent from the future?",at:"Terminator: The Sarah Connor Chronicles",diff:"difficile",c:["Terminator: SCC","Westworld","Humans","Person of Interest"]},
+],
+jeux:[
+{q:"Quel jeu met en scène un plombier qui saute sur des champignons ?",a:"Super Mario",qt:"Which game features a plumber who jumps on mushrooms?",at:"Super Mario",diff:"facile",c:["Super Mario","Sonic","Crash Bandicoot","Donkey Kong"]},
+{q:"Dans quel jeu construit-on avec des blocs dans un monde ouvert ?",a:"Minecraft",qt:"In which game do you build with blocks in an open world?",at:"Minecraft",diff:"facile",c:["Minecraft","Roblox","LEGO Worlds","Terraria"]},
+{q:"Quel jeu met en scène 100 joueurs sur une île jusqu'au dernier survivant ?",a:"Fortnite",qt:"Which game features 100 players on an island until only one survivor remains?",at:"Fortnite",diff:"facile",c:["Fortnite","PUBG","Warzone","Apex Legends"]},
+{q:"Dans quel jeu Lara Croft explore-t-elle des tombeaux ?",a:"Tomb Raider",qt:"In which game does Lara Croft explore tombs?",at:"Tomb Raider",diff:"facile",c:["Tomb Raider","Uncharted","Indiana Jones","Pitfall"]},
+{q:"Quel jeu met en scène un héros en vert nommé Link avec une épée légendaire ?",a:"The Legend of Zelda",qt:"Which game features a hero in green named Link with a legendary sword?",at:"The Legend of Zelda",diff:"facile",c:["The Legend of Zelda","Dark Souls","Skyrim","Final Fantasy"]},
+{q:"Dans quel jeu des animaux mignons vivent dans votre village ?",a:"Animal Crossing",qt:"In which game do cute animals live in your village?",at:"Animal Crossing",diff:"facile",c:["Animal Crossing","Stardew Valley","Harvest Moon","My Time at Portia"]},
+{q:"Qui est le personnage principal de la saga Halo ?",a:"Master Chief",qt:"Who is the main character of the Halo saga?",at:"Master Chief",diff:"facile",c:["Master Chief","Noble Six","Agent Locke","Commander Shepard"]},
+{q:"Quel jeu de combat met en scène Ryu et Ken ?",a:"Street Fighter",qt:"Which fighting game features Ryu and Ken?",at:"Street Fighter",diff:"facile",c:["Street Fighter","Mortal Kombat","Tekken","King of Fighters"]},
+{q:"Dans quel jeu capture-t-on des créatures pour se battre ?",a:"Pokémon",qt:"In which game do you capture creatures to battle with them?",at:"Pokémon",diff:"facile",c:["Pokémon","Yokai Watch","Digimon","Monster Hunter"]},
+{q:"Quelle console Nintendo a popularisé Mario Kart 64 ?",a:"Nintendo 64",qt:"Which Nintendo console made Mario Kart 64 popular?",at:"Nintendo 64",diff:"facile",c:["Nintendo 64","Super Nintendo","GameCube","Nintendo DS"]},
+{q:"En quelle année est sorti le premier jeu Pokémon au Japon ?",a:"1996",qt:"In which year was the first Pokémon game released in Japan?",at:"1996",diff:"moyen",c:["1996","1998","1994","2000"]},
+{q:"Quelle société développe Grand Theft Auto ?",a:"Rockstar Games",qt:"Which company develops Grand Theft Auto?",at:"Rockstar Games",diff:"moyen",c:["Rockstar Games","EA Games","Activision","Ubisoft"]},
+{q:"Quel jeu RPG se déroule dans le monde de Tamriel ?",a:"The Elder Scrolls (Skyrim)",qt:"Which RPG is set in the world of Tamriel?",at:"The Elder Scrolls (Skyrim)",diff:"moyen",c:["The Elder Scrolls","The Witcher","Dark Souls","Dragon Age"]},
+{q:"Qui est le créateur de Minecraft ?",a:"Markus 'Notch' Persson",qt:"Who is the creator of Minecraft?",at:"Markus 'Notch' Persson",diff:"moyen",c:["Markus 'Notch' Persson","Jens 'Jeb' Bergensten","Tobias Möller","Carl Manneh"]},
+{q:"Quel est le héros de la saga Metal Gear Solid ?",a:"Solid Snake",qt:"Who is the hero of the Metal Gear Solid saga?",at:"Solid Snake",diff:"moyen",c:["Solid Snake","Venom Snake","Big Boss","Raiden"]},
+{q:"Qui est le personnage principal de Red Dead Redemption 2 ?",a:"Arthur Morgan",qt:"Who is the main character of Red Dead Redemption 2?",at:"Arthur Morgan",diff:"moyen",c:["Arthur Morgan","John Marston","Dutch van der Linde","Trevor Philips"]},
+{q:"Quelle saga a créé le genre 'survival horror' dans les années 90 ?",a:"Resident Evil",qt:"Which saga created the 'survival horror' genre in the 90s?",at:"Resident Evil",diff:"moyen",c:["Resident Evil","Silent Hill","Doom","Quake"]},
+{q:"Quelle console Sony a été lancée en 1994 ?",a:"PlayStation",qt:"Which Sony console launched in 1994?",at:"PlayStation",diff:"moyen",c:["PlayStation","PlayStation 2","Saturn","Mega Drive"]},
+{q:"Dans quel jeu on joue un assassin dans la Renaissance italienne ?",a:"Assassin's Creed II",qt:"In which game do you play an assassin during the Italian Renaissance?",at:"Assassin's Creed II",diff:"moyen",c:["Assassin's Creed II","Prince of Persia","Dishonored","Hitman"]},
+{q:"Quel jeu de simulation de vie est le plus vendu de l'histoire ?",a:"Les Sims",qt:"Which life simulation game is the best-selling of all time?",at:"The Sims",diff:"moyen",c:["Les Sims","Animal Crossing","Harvest Moon","Stardew Valley"]},
+{q:"En quelle année est sorti le premier Final Fantasy ?",a:"1987",qt:"In which year was the first Final Fantasy released?",at:"1987",diff:"difficile",c:["1987","1990","1985","1989"],e:"Final Fantasy est sorti au Japon le 18 décembre 1987 sur NES."},
+{q:"Quel studio polonais a développé The Witcher 3 ?",a:"CD Projekt Red",qt:"Which Polish studio developed The Witcher 3?",at:"CD Projekt Red",diff:"difficile",c:["CD Projekt Red","Techland","11 bit studios","Flying Wild Hog"]},
+{q:"Quelle est la console la plus vendue de tous les temps ?",a:"PlayStation 2",qt:"Which is the best-selling console of all time?",at:"PlayStation 2",diff:"difficile",c:["PlayStation 2","Nintendo DS","Game Boy","PlayStation 4"],e:"La PS2 s'est vendue à plus de 155 millions d'exemplaires."},
+{q:"Dans quel jeu un scientifique nommé Gordon Freeman affronte des aliens ?",a:"Half-Life",qt:"In which game does a scientist named Gordon Freeman fight aliens?",at:"Half-Life",diff:"difficile",c:["Half-Life","Portal","Quake","Deus Ex"]},
+{q:"En quelle année Pac-Man est-il sorti dans les salles d'arcade ?",a:"1980",qt:"In which year did Pac-Man come out in arcades?",at:"1980",diff:"difficile",c:["1980","1978","1982","1975"]},
+{q:"Quel jeu vidéo de plateforme met en scène un hérisson bleu ?",a:"Sonic",qt:"Which platform video game features a blue hedgehog?",at:"Sonic",diff:"facile",c:["Sonic","Mario","Crash Bandicoot","Rayman"]},
+{q:"Quel jeu de stratégie en temps réel oppose Zergs, Terrans et Protoss ?",a:"StarCraft",qt:"Which real-time strategy game pits Zergs, Terrans and Protoss against each other?",at:"StarCraft",diff:"difficile",c:["StarCraft","Warcraft","Command & Conquer","Age of Empires"]},
+{q:"Quel jeu mobile mettant en scène des oiseaux furieux a cartonné en 2009 ?",a:"Angry Birds",qt:"Which mobile game featuring angry birds was a hit in 2009?",at:"Angry Birds",diff:"facile",c:["Angry Birds","Candy Crush","Plants vs Zombies","Fruit Ninja"]},
+],
+sport:[
+{q:"Quel pays a remporté la Coupe du Monde de Football 2018 ?",a:"France",qt:"Which country won the 2018 Football World Cup?",at:"France",diff:"facile",c:["France","Croatie","Belgique","Angleterre"]},
+{q:"Combien de joueurs composent une équipe de football ?",a:"11",qt:"How many players make up a football (soccer) team?",at:"11",diff:"facile",c:["11","10","12","9"]},
+{q:"Qui est le joueur de basketball le plus célèbre de l'histoire ?",a:"Michael Jordan",qt:"Who is the most famous basketball player in history?",at:"Michael Jordan",diff:"facile",c:["Michael Jordan","LeBron James","Kobe Bryant","Magic Johnson"]},
+{q:"Quel nageur américain a remporté le plus de médailles olympiques ?",a:"Michael Phelps",qt:"Which American swimmer won the most Olympic medals?",at:"Michael Phelps",diff:"facile",c:["Michael Phelps","Mark Spitz","Ryan Lochte","Ian Thorpe"]},
+{q:"Dans quel sport pratique-t-on le slam dunk ?",a:"Basketball",qt:"In which sport do you perform a 'slam dunk'?",at:"Basketball",diff:"facile",c:["Basketball","Volleyball","Handball","Rugby"]},
+{q:"Qui a remporté le plus de Ballons d'Or (2024) ?",a:"Lionel Messi",qt:"Who has won the most Ballon d'Or awards (2024)?",at:"Lionel Messi",diff:"facile",c:["Lionel Messi","Cristiano Ronaldo","Ronaldinho","Zinedine Zidane"]},
+{q:"Quel sport se pratique avec une raquette et une balle jaune sur un court ?",a:"Tennis",qt:"Which sport is played with a racket and a yellow ball on a court?",at:"Tennis",diff:"facile",c:["Tennis","Badminton","Squash","Padel"]},
+{q:"Quelle équipe a remporté le plus de Ligues des Champions ?",a:"Real Madrid",qt:"Which team has won the most Champions League titles?",at:"Real Madrid",diff:"facile",c:["Real Madrid","Bayern Munich","FC Barcelona","Liverpool"]},
+{q:"Quel athlète jamaïcain détient le record du 100m masculin ?",a:"Usain Bolt",qt:"Which Jamaican athlete holds the men's 100m world record?",at:"Usain Bolt",diff:"facile",c:["Usain Bolt","Yohan Blake","Tyson Gay","Asafa Powell"]},
+{q:"Quel pays organise les Jeux Olympiques d'été 2024 ?",a:"France (Paris)",qt:"Which country hosted the 2024 Summer Olympics?",at:"France (Paris)",diff:"facile",c:["France (Paris)","Australie","États-Unis","Espagne"]},
+{q:"En quelle année la France a-t-elle remporté sa première Coupe du Monde ?",a:"1998",qt:"In which year did France win its first World Cup?",at:"1998",diff:"moyen",c:["1998","1994","2002","2006"]},
+{q:"Quel joueur de tennis a remporté le plus de tournois du Grand Chelem (hommes, 2024) ?",a:"Novak Djokovic",qt:"Which tennis player has won the most Grand Slam titles (men, 2024)?",at:"Novak Djokovic",diff:"moyen",c:["Novak Djokovic","Rafael Nadal","Roger Federer","Pete Sampras"]},
+{q:"Quel est le record du monde du 100m masculin ?",a:"9''58 (Usain Bolt)",qt:"What is the men's 100m world record?",at:"9.58 seconds (Usain Bolt)",diff:"moyen",c:["9''58","9''69","9''74","9''84"]},
+{q:"Dans quel sport utilise-t-on un stick et un palet ?",a:"Hockey sur glace",qt:"Which sport uses a stick and a puck?",at:"Ice hockey",diff:"moyen",c:["Hockey sur glace","Hockey sur gazon","Crosse","Polo"]},
+{q:"Quel pays a remporté le plus de Coupes du Monde de Football ?",a:"Brésil",qt:"Which country has won the most Football World Cups?",at:"Brazil",diff:"moyen",c:["Brésil","Allemagne","Italie","Argentine"]},
+{q:"Quel boxeur est surnommé 'The Greatest' ?",a:"Muhammad Ali",qt:"Which boxer is nicknamed 'The Greatest'?",at:"Muhammad Ali",diff:"moyen",c:["Muhammad Ali","Mike Tyson","Joe Frazier","Floyd Patterson"]},
+{q:"Dans quel sport le terme 'birdie' est-il utilisé ?",a:"Golf",qt:"In which sport is the term 'birdie' used?",at:"Golf",diff:"moyen",c:["Golf","Cricket","Tennis","Baseball"]},
+{q:"En quelle année se sont déroulés les premiers Jeux Olympiques modernes ?",a:"1896 (Athènes)",qt:"In which year were the first modern Olympic Games held?",at:"1896 (Athens)",diff:"moyen",c:["1896","1900","1888","1904"]},
+{q:"Quel est le vrai prénom de Magic Johnson ?",a:"Earvin",qt:"What is Magic Johnson's real first name?",at:"Earvin",diff:"moyen",c:["Earvin","Michael","James","Ervin"]},
+{q:"Quel pays a remporté la Coupe du Monde de Rugby 2023 ?",a:"Afrique du Sud",qt:"Which country won the 2023 Rugby World Cup?",at:"South Africa",diff:"moyen",c:["Afrique du Sud","Nouvelle-Zélande","France","Irlande"]},
+{q:"En quelle année Zinedine Zidane a-t-il pris sa retraite ?",a:"2006",qt:"In which year did Zinedine Zidane retire?",at:"2006",diff:"difficile",c:["2006","2004","2008","2005"],e:"Après la finale du Mondial contre l'Italie, expulsé pour son coup de tête."},
+{q:"Quel coureur cycliste a remporté 7 Tours de France avant d'être déchu ?",a:"Lance Armstrong",qt:"Which cyclist won 7 Tours de France before being stripped of his titles?",at:"Lance Armstrong",diff:"difficile",c:["Lance Armstrong","Jan Ullrich","Marco Pantani","Floyd Landis"]},
+{q:"Dans quel pays est né Cristiano Ronaldo ?",a:"Portugal (île de Madère)",qt:"In which country was Cristiano Ronaldo born?",at:"Portugal (Madeira island)",diff:"difficile",c:["Portugal (île de Madère)","Espagne","Brésil","Cap-Vert"]},
+{q:"Quelle est la durée d'un match de rugby à XV ?",a:"80 minutes",qt:"How long does a rugby union match last?",at:"80 minutes",diff:"difficile",c:["80 minutes","90 minutes","70 minutes","100 minutes"]},
+{q:"Quel est le record du monde du marathon homologué ?",a:"2h00'35'' (Eliud Kipchoge, 2023)",qt:"What is the official marathon world record?",at:"2:00:35 (Eliud Kipchoge, 2023)",diff:"difficile",c:["2h00'35''","1h59'40''","2h01'39''","2h03'00''"]},
+{q:"Combien de joueurs composent une équipe de basketball sur le terrain ?",a:"5",qt:"How many players make up a basketball team on the court?",at:"5",diff:"facile",c:["5","6","7","4"]},
+{q:"Quel pays a inventé le judo ?",a:"Japon",qt:"Which country invented judo?",at:"Japan",diff:"facile",c:["Japon","Chine","Corée","Thaïlande"]},
+{q:"Quel sportif est surnommé 'CR7' ?",a:"Cristiano Ronaldo",qt:"Which athlete is nicknamed 'CR7'?",at:"Cristiano Ronaldo",diff:"facile",c:["Cristiano Ronaldo","Carlos Ramos","Carlos Rodriguez","Cesc Ramos"]},
+{q:"Quelle équipe de NBA a remporté le plus de titres de champion ?",a:"Boston Celtics",qt:"Which NBA team has won the most championship titles?",at:"Boston Celtics",diff:"moyen",c:["Boston Celtics","Los Angeles Lakers","Chicago Bulls","Golden State Warriors"]},
+],
+perso:[
+{q:"Qui a créé Facebook ?",a:"Mark Zuckerberg",qt:"Who created Facebook?",at:"Mark Zuckerberg",diff:"facile",c:["Mark Zuckerberg","Jack Dorsey","Evan Spiegel","Bill Gates"]},
+{q:"Quel acteur interprète Wolverine dans X-Men ?",a:"Hugh Jackman",qt:"Which actor plays Wolverine in X-Men?",at:"Hugh Jackman",diff:"facile",c:["Hugh Jackman","Russell Crowe","Chris Hemsworth","Liam Neeson"]},
+{q:"Qui est le fondateur d'Apple ?",a:"Steve Jobs (et Steve Wozniak)",qt:"Who is the founder of Apple?",at:"Steve Jobs (and Steve Wozniak)",diff:"facile",c:["Steve Jobs","Bill Gates","Elon Musk","Jeff Bezos"]},
+{q:"Qui a peint la Joconde ?",a:"Léonard de Vinci",qt:"Who painted the Mona Lisa?",at:"Leonardo da Vinci",diff:"facile",c:["Léonard de Vinci","Michel-Ange","Raphaël","Botticelli"]},
+{q:"Qui est la chanteuse de 'Poker Face' ?",a:"Lady Gaga",qt:"Who is the singer of 'Poker Face'?",at:"Lady Gaga",diff:"facile",c:["Lady Gaga","Katy Perry","Rihanna","Beyoncé"]},
+{q:"Quel acteur a joué James Bond le plus longtemps ?",a:"Roger Moore (7 films)",qt:"Which actor played James Bond the longest?",at:"Roger Moore (7 films)",diff:"facile",c:["Roger Moore","Sean Connery","Daniel Craig","Timothy Dalton"]},
+{q:"Qui est le fondateur d'Amazon ?",a:"Jeff Bezos",qt:"Who is the founder of Amazon?",at:"Jeff Bezos",diff:"facile",c:["Jeff Bezos","Elon Musk","Mark Zuckerberg","Larry Page"]},
+{q:"Quel scientifique a découvert la radioactivité ?",a:"Marie Curie (et Henri Becquerel)",qt:"Which scientist discovered radioactivity?",at:"Marie Curie (and Henri Becquerel)",diff:"facile",c:["Marie Curie","Louis Pasteur","Nikola Tesla","Albert Einstein"]},
+{q:"Qui est l'acteur principal de la saga Mission Impossible ?",a:"Tom Cruise",qt:"Who is the lead actor of the Mission Impossible saga?",at:"Tom Cruise",diff:"facile",c:["Tom Cruise","Matt Damon","Keanu Reeves","Will Smith"]},
+{q:"Qui a peint La Nuit étoilée ?",a:"Vincent van Gogh",qt:"Who painted The Starry Night?",at:"Vincent van Gogh",diff:"facile",c:["Vincent van Gogh","Claude Monet","Paul Gauguin","Paul Cézanne"]},
+{q:"Quel est le vrai nom de Coluche ?",a:"Michel Colucci",qt:"What is Coluche's real name?",at:"Michel Colucci",diff:"moyen",c:["Michel Colucci","Michel Renaud","Michel Blanc","Michel Drucker"]},
+{q:"Qui est le PDG de Tesla ?",a:"Elon Musk",qt:"Who is the CEO of Tesla?",at:"Elon Musk",diff:"moyen",c:["Elon Musk","Jeff Bezos","Tim Cook","Sundar Pichai"]},
+{q:"Qui est l'inventeur du World Wide Web ?",a:"Tim Berners-Lee",qt:"Who is the inventor of the World Wide Web?",at:"Tim Berners-Lee",diff:"moyen",c:["Tim Berners-Lee","Bill Gates","Steve Jobs","Vint Cerf"]},
+{q:"Quel chanteur français surnommé 'Le Taulier' est décédé en 2017 ?",a:"Johnny Hallyday",qt:"Which French singer nicknamed 'Le Taulier' died in 2017?",at:"Johnny Hallyday",diff:"moyen",c:["Johnny Hallyday","Claude François","Michel Sardou","Charles Aznavour"]},
+{q:"Qui est le créateur de la théorie de l'évolution des espèces ?",a:"Charles Darwin",qt:"Who is the creator of the theory of evolution of species?",at:"Charles Darwin",diff:"moyen",c:["Charles Darwin","Jean-Baptiste Lamarck","Gregor Mendel","Alfred Russell Wallace"]},
+{q:"Qui a remporté le prix Nobel de la Paix en 1964 ?",a:"Martin Luther King Jr.",qt:"Who won the Nobel Peace Prize in 1964?",at:"Martin Luther King Jr.",diff:"moyen",c:["Martin Luther King Jr.","Nelson Mandela","Mahatma Gandhi","Desmond Tutu"]},
+{q:"Qui est le fondateur de Microsoft ?",a:"Bill Gates et Paul Allen",qt:"Who is the founder of Microsoft?",at:"Bill Gates and Paul Allen",diff:"moyen",c:["Bill Gates et Paul Allen","Bill Gates seul","Steve Ballmer","Bill Gates et Steve Jobs"]},
+{q:"Quel philosophe a dit 'Je pense donc je suis' ?",a:"Descartes",qt:"Which philosopher said 'I think, therefore I am'?",at:"Descartes",diff:"moyen",c:["Descartes","Voltaire","Rousseau","Kant"]},
+{q:"Qui était la première femme à remporter le prix Nobel ?",a:"Marie Curie (1903, physique)",qt:"Who was the first woman to win a Nobel Prize?",at:"Marie Curie (1903, physics)",diff:"moyen",c:["Marie Curie","Bertha von Suttner","Selma Lagerlöf","Grazia Deledda"]},
+{q:"Quel est le vrai nom de Voltaire ?",a:"François-Marie Arouet",qt:"What is Voltaire's real name?",at:"François-Marie Arouet",diff:"difficile",c:["François-Marie Arouet","François Voltaire","Victor Arouet","Jean-Marie Voltaire"]},
+{q:"Qui était le premier homme à atteindre le pôle Sud ?",a:"Roald Amundsen",qt:"Who was the first man to reach the South Pole?",at:"Roald Amundsen",diff:"difficile",c:["Roald Amundsen","Robert Scott","Ernest Shackleton","Douglas Mawson"],e:"Amundsen l'atteint le 14 décembre 1911, 33 jours avant Robert Scott."},
+{q:"Qui a fondé la Croix-Rouge ?",a:"Henri Dunant",qt:"Who founded the Red Cross?",at:"Henri Dunant",diff:"difficile",c:["Henri Dunant","Florence Nightingale","Clara Barton","Jean-Henry Dunant"]},
+{q:"Quel philosophe grec a été le maître d'Alexandre le Grand ?",a:"Aristote",qt:"Which Greek philosopher was the teacher of Alexander the Great?",at:"Aristotle",diff:"difficile",c:["Aristote","Platon","Socrate","Épicure"]},
+{q:"Quel est le vrai nom de Marilyn Monroe ?",a:"Norma Jeane Mortenson",qt:"What is Marilyn Monroe's real name?",at:"Norma Jeane Mortenson",diff:"difficile",c:["Norma Jeane Mortenson","Norma Jean Baker","Marilyn Baker","Norma Monroe"]},
+{q:"Qui est l'inventeur du téléphone (première à déposer le brevet) ?",a:"Alexander Graham Bell",qt:"Who is the inventor of the telephone (first to file a patent)?",at:"Alexander Graham Bell",diff:"difficile",c:["Alexander Graham Bell","Elisha Gray","Nikola Tesla","Thomas Edison"],e:"Bell a déposé son brevet quelques heures avant Elisha Gray le 14 février 1876."},
+{q:"Quelle actrice française a joué Amélie Poulain ?",a:"Audrey Tautou",qt:"Which French actress played Amélie Poulain?",at:"Audrey Tautou",diff:"facile",c:["Audrey Tautou","Marion Cotillard","Sophie Marceau","Léa Seydoux"]},
+{q:"Qui est le créateur de la théorie de la gravitation universelle ?",a:"Isaac Newton",qt:"Who is the creator of the theory of universal gravitation?",at:"Isaac Newton",diff:"facile",c:["Isaac Newton","Galilée","Einstein","Kepler"]},
+{q:"Quel humoriste français est connu pour son personnage du 'Gendarme' ?",a:"Louis de Funès",qt:"Which French comedian is known for his 'Gendarme' character?",at:"Louis de Funès",diff:"moyen",c:["Louis de Funès","Pierre Richard","Coluche","Fernandel"]},
+],
+vf:[
+{q:"Les éléphants ont vraiment peur des souris.",a:"Faux",qt:"Elephants are really afraid of mice.",at:"False",diff:"facile",c:["Faux","Vrai"],e:"C'est un mythe populaire. Les éléphants peuvent s'effrayer de mouvements soudains."},
+{q:"La Tour Eiffel a été construite pour l'Exposition Universelle de 1889.",a:"Vrai",qt:"The Eiffel Tower was built for the 1889 World's Fair.",at:"True",diff:"facile",c:["Vrai","Faux"]},
+{q:"Les bananes poussent sur des arbres.",a:"Faux",qt:"Bananas grow on trees.",at:"False",diff:"facile",c:["Faux","Vrai"],e:"Les bananes poussent sur des herbacées géantes, pas sur de vrais arbres."},
+{q:"Les pingouins vivent au pôle Sud.",a:"Vrai",qt:"Penguins live at the South Pole.",at:"True",diff:"facile",c:["Vrai","Faux"],e:"La plupart des pingouins vivent en Antarctique (pôle Sud), pas au Nord."},
+{q:"L'eau bout à 100°C au niveau de la mer.",a:"Vrai",qt:"Water boils at 100°C at sea level.",at:"True",diff:"facile",c:["Vrai","Faux"]},
+{q:"Les chauves-souris sont complètement aveugles.",a:"Faux",qt:"Bats are completely blind.",at:"False",diff:"facile",c:["Faux","Vrai"],e:"Elles voient bien mais utilisent aussi l'écholocation pour chasser dans le noir."},
+{q:"La Grande Muraille de Chine est visible depuis la Lune.",a:"Faux",qt:"The Great Wall of China is visible from the Moon.",at:"False",diff:"facile",c:["Faux","Vrai"],e:"C'est un mythe. La muraille est trop étroite pour être vue depuis l'espace."},
+{q:"Les pieuvres ont trois cœurs.",a:"Vrai",qt:"Octopuses have three hearts.",at:"True",diff:"facile",c:["Vrai","Faux"],e:"Deux cœurs branchies + un cœur systémique."},
+{q:"Les requins sont des mammifères.",a:"Faux",qt:"Sharks are mammals.",at:"False",diff:"facile",c:["Faux","Vrai"],e:"Les requins sont des poissons cartilagineux."},
+{q:"La France est le pays le plus visité au monde.",a:"Vrai",qt:"France is the most visited country in the world.",at:"True",diff:"facile",c:["Vrai","Faux"],e:"Avec environ 90 millions de touristes par an, la France est la 1ère destination mondiale."},
+{q:"Un adulte a 32 dents (avec les dents de sagesse).",a:"Vrai",qt:"An adult has 32 teeth (including wisdom teeth).",at:"True",diff:"facile",c:["Vrai","Faux"],e:"28 dents de base + 4 dents de sagesse = 32."},
+{q:"Les escargots peuvent dormir jusqu'à trois ans.",a:"Vrai",qt:"Snails can sleep for up to three years.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"En cas de sécheresse, un escargot peut entrer en dormance jusqu'à 3 ans."},
+{q:"L'ADN humain et celui d'une banane partagent environ 50% de similitudes.",a:"Vrai",qt:"Human DNA and banana DNA share about 50% similarity.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"Environ 50-60% de nos gènes ont des équivalents chez la banane."},
+{q:"Les humains et les chimpanzés partagent environ 98% d'ADN.",a:"Vrai",qt:"Humans and chimpanzees share about 98% of their DNA.",at:"True",diff:"moyen",c:["Vrai","Faux"]},
+{q:"Il est légal de marier quelqu'un de décédé en France.",a:"Vrai",qt:"It is legal to marry a deceased person in France.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"Le mariage posthume est légal en France depuis 1959 (sous certaines conditions)."},
+{q:"Les pieuvres ont du sang bleu.",a:"Vrai",qt:"Octopuses have blue blood.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"Leur sang contient de l'hémocyanine (cuivre) au lieu d'hémoglobine (fer)."},
+{q:"Les abeilles peuvent voir la couleur rouge.",a:"Faux",qt:"Bees can see the color red.",at:"False",diff:"moyen",c:["Faux","Vrai"],e:"Les abeilles voient l'ultraviolet mais pas le rouge."},
+{q:"Les dauphins dorment avec un seul côté du cerveau à la fois.",a:"Vrai",qt:"Dolphins sleep with only one half of their brain at a time.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"C'est le sommeil uni-hémisphérique, qui leur permet de rester conscients."},
+{q:"Le corps humain contient plus de bactéries que de cellules humaines.",a:"Vrai",qt:"The human body contains more bacteria than human cells.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"On estime un rapport d'environ 1:1 à 3:1 selon les études récentes."},
+{q:"Le mont Blanc est le plus haut sommet d'Europe.",a:"Faux",qt:"Mont Blanc is the highest peak in Europe.",at:"False",diff:"moyen",c:["Faux","Vrai"],e:"Le mont Elbrouz dans le Caucase (5 642 m) est plus haut que le Mont Blanc (4 808 m)."},
+{q:"L'eau chaude peut geler plus vite que l'eau froide.",a:"Vrai",qt:"Hot water can freeze faster than cold water.",at:"True",diff:"difficile",c:["Vrai","Faux"],e:"C'est l'effet Mpemba, observé dans certaines conditions précises, bien que débattu."},
+{q:"Le platypus est le seul mammifère à pondre des œufs.",a:"Faux",qt:"The platypus is the only mammal that lays eggs.",at:"False",diff:"difficile",c:["Faux","Vrai"],e:"Les échidnés pondent aussi des œufs. Ces deux animaux forment l'ordre des monotrèmes."},
+{q:"Les étoiles de mer peuvent régénérer leurs bras perdus.",a:"Vrai",qt:"Starfish can regenerate lost arms.",at:"True",diff:"difficile",c:["Vrai","Faux"]},
+{q:"On utilise seulement 10% de notre cerveau.",a:"Faux",qt:"We only use 10% of our brain.",at:"False",diff:"difficile",c:["Faux","Vrai"],e:"C'est un mythe. On utilise la quasi-totalité de notre cerveau selon les neurosciences."},
+{q:"Le verre est techniquement un liquide visqueux très lent.",a:"Faux",qt:"Glass is technically a very slow-moving liquid.",at:"False",diff:"difficile",c:["Faux","Vrai"],e:"Le verre est un solide amorphe. La théorie du liquide lent a été réfutée."},
+{q:"Les fourmis peuvent soulever jusqu'à 50 fois leur propre poids.",a:"Vrai",qt:"Ants can lift up to 50 times their own body weight.",at:"True",diff:"difficile",c:["Vrai","Faux"],e:"Selon les espèces, certaines fourmis peuvent soulever 10 à 50 fois leur masse."},
+{q:"Un œuf dur se conserve moins longtemps qu'un œuf cru au réfrigérateur.",a:"Vrai",qt:"A hard-boiled egg keeps for less time than a raw egg in the fridge.",at:"True",diff:"difficile",c:["Vrai","Faux"],e:"La cuisson détruit la couticule protectrice naturelle de l'œuf."},
+{q:"La lune s'éloigne de la Terre d'environ 3,8 cm par an.",a:"Vrai",qt:"The Moon is moving away from the Earth by about 3.8 cm per year.",at:"True",diff:"difficile",c:["Vrai","Faux"],e:"La Lune s'éloigne progressivement à cause des forces de marée."},
+{q:"Le miel ne se périme jamais s'il est bien conservé.",a:"Vrai",qt:"Honey never spoils if stored properly.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"Le miel a une durée de conservation quasi illimitée grâce à sa faible teneur en eau."},
+{q:"Les girafes dorment debout.",a:"Vrai",qt:"Giraffes sleep standing up.",at:"True",diff:"moyen",c:["Vrai","Faux"],e:"Les girafes dorment très peu (env. 30 min/jour) et souvent debout."},
+{q:"Le Sahara était autrefois une zone verte et fertile.",a:"Vrai",qt:"The Sahara used to be a green, fertile area.",at:"True",diff:"difficile",c:["Vrai","Faux"],e:"Il y a environ 10 000 ans, le Sahara était une savane verdoyante."},
+{q:"Les humains perdent environ 50 à 100 cheveux par jour naturellement.",a:"Vrai",qt:"Humans naturally lose about 50 to 100 hairs a day.",at:"True",diff:"facile",c:["Vrai","Faux"]},
+],
+records:[
+{q:"Quel est l'animal terrestre le plus rapide ?",a:"Le guépard",qt:"What is the fastest land animal?",at:"The cheetah",diff:"facile",c:["Le guépard","Le lion","L'antilope","Le lièvre"],e:"Le guépard peut atteindre 110-120 km/h sur de courtes distances."},
+{q:"Quel est le plus haut sommet du monde ?",a:"L'Everest (8 849 m)",qt:"What is the highest mountain in the world?",at:"Mount Everest (8,849 m)",diff:"facile",c:["L'Everest","Le K2","L'Aconcagua","Le Mont Blanc"]},
+{q:"Quel est l'animal le plus grand du monde ?",a:"La baleine bleue",qt:"What is the largest animal in the world?",at:"The blue whale",diff:"facile",c:["La baleine bleue","L'éléphant d'Afrique","La girafe","Le cachalot"]},
+{q:"Quel est le livre le plus vendu de l'histoire ?",a:"La Bible",qt:"What is the best-selling book in history?",at:"The Bible",diff:"facile",c:["La Bible","Harry Potter","Le Petit Prince","Don Quichotte"]},
+{q:"Quel est le pays le plus grand du monde ?",a:"Russie",qt:"What is the largest country in the world?",at:"Russia",diff:"facile",c:["Russie","Canada","Chine","États-Unis"]},
+{q:"Quel est le film le plus rentable de tous les temps (2024) ?",a:"Avatar (2009)",qt:"What is the highest-grossing film of all time (2024)?",at:"Avatar (2009)",diff:"facile",c:["Avatar (2009)","Avengers Endgame","Titanic","Star Wars"],e:"Avatar cumule 2,9 milliards de dollars de recettes."},
+{q:"Quel est le record du monde du 100m masculin ?",a:"9''58 (Usain Bolt, 2009)",qt:"What is the men's 100m world record?",at:"9.58 seconds (Usain Bolt, 2009)",diff:"moyen",c:["9''58","9''69","9''74","9''84"]},
+{q:"Quel est le bâtiment le plus haut du monde ?",a:"Burj Khalifa (828 m)",qt:"What is the tallest building in the world?",at:"Burj Khalifa (828 m)",diff:"moyen",c:["Burj Khalifa","Shanghai Tower","Abraj Al-Bait","One World Trade Center"]},
+{q:"Quel est le roman le plus vendu (hors Bible) selon de nombreuses sources ?",a:"Don Quichotte",qt:"What is the best-selling novel (excluding the Bible) according to many sources?",at:"Don Quixote",diff:"moyen",c:["Don Quichotte","Harry Potter","Le Petit Prince","Deux cités"]},
+{q:"Quelle est la structure vivante naturelle la plus longue du monde ?",a:"La Grande Barrière de Corail (2 300 km)",qt:"What is the longest natural living structure in the world?",at:"The Great Barrier Reef (2,300 km)",diff:"moyen",c:["La Grande Barrière de Corail","L'Amazone","La Grande Muraille","La Vallée de la Mort"]},
+{q:"Quel pays a remporté le plus de Coupes du Monde de Football ?",a:"Brésil (5 titres)",qt:"Which country has won the most Football World Cups?",at:"Brazil (5 titles)",diff:"moyen",c:["Brésil (5)","Allemagne (4)","Italie (4)","Argentine (3)"]},
+{q:"Quelle est la personne la plus grande de l'histoire moderne ?",a:"Robert Wadlow (2,72 m)",qt:"Who is the tallest person in modern history?",at:"Robert Wadlow (2.72 m)",diff:"moyen",c:["Robert Wadlow","Leonid Stadnik","Sultan Kösen","Don Koehler"]},
+{q:"Quel est le record du monde d'apnée statique homologué ?",a:"Plus de 24 minutes",qt:"What is the official world record for static apnea?",at:"Over 24 minutes",diff:"difficile",c:["Plus de 24 minutes","18 minutes","15 minutes","20 minutes"],e:"Budimir Šobat a tenu 24 minutes et 37 secondes en 2021."},
+{q:"Quelle est la vitesse maximale jamais atteinte sur terre par un véhicule terrestre ?",a:"Environ 1 228 km/h (ThrustSSC, 1997)",qt:"What is the highest speed ever reached on land by a vehicle?",at:"About 1,228 km/h (ThrustSSC, 1997)",diff:"difficile",c:["1 228 km/h","978 km/h","800 km/h","1 500 km/h"],e:"ThrustSSC a brisé le mur du son sur terre le 15 octobre 1997."},
+{q:"Quel est l'être vivant le plus vieux jamais découvert ?",a:"Ming, une palourde de ~507 ans",qt:"What is the oldest living being ever discovered?",at:"Ming, a clam aged ~507 years",diff:"difficile",c:["Ming (palourde, 507 ans)","Un cèdre de 5 000 ans","Un séquoia de 3 500 ans","Une tortue de 250 ans"]},
+{q:"Quel est le pays avec la plus longue espérance de vie au monde ?",a:"Japon",qt:"Which country has the longest life expectancy in the world?",at:"Japan",diff:"moyen",c:["Japon","Suisse","Singapour","Espagne"]},
+{q:"Quel est l'animal qui dort le plus longtemps par jour ?",a:"Le koala (env. 20-22h)",qt:"Which animal sleeps the longest per day?",at:"The koala (about 20-22h)",diff:"moyen",c:["Le koala","Le paresseux","Le chat","La chauve-souris"]},
+{q:"Quelle est la plus grande fortune personnelle au monde (2024) ?",a:"Elon Musk",qt:"What is the largest personal fortune in the world (2024)?",at:"Elon Musk",diff:"moyen",c:["Elon Musk","Jeff Bezos","Bernard Arnault","Bill Gates"]},
+{q:"Quel est le plat le plus épicé du monde reconnu officiellement ?",a:"Le piment Carolina Reaper",qt:"What is the officially recognized spiciest dish in the world?",at:"The Carolina Reaper pepper",diff:"difficile",c:["Le piment Carolina Reaper","Le piment Habanero","Le piment Naga","Le piment Ghost"]},
+{q:"Quelle est la ville la plus peuplée du monde ?",a:"Tokyo",qt:"What is the most populous city in the world?",at:"Tokyo",diff:"facile",c:["Tokyo","Delhi","Shanghai","Mexico"]},
+{q:"Quel est l'oiseau le plus rapide en vol piqué ?",a:"Le faucon pèlerin (jusqu'à 390 km/h)",qt:"What is the fastest bird in a diving flight?",at:"The peregrine falcon (up to 390 km/h)",diff:"moyen",c:["Le faucon pèlerin","L'aigle royal","Le martinet","Le condor"]},
+{q:"Quel est le plus petit pays d'Europe continentale (hors îles) ?",a:"Le Vatican",qt:"What is the smallest country in continental Europe (excluding islands)?",at:"Vatican City",diff:"facile",c:["Le Vatican","Monaco","Saint-Marin","Liechtenstein"]},
+{q:"Quel est l'animal le plus venimeux du monde ?",a:"La méduse-boîte (guêpe de mer)",qt:"What is the most venomous animal in the world?",at:"The box jellyfish",diff:"difficile",c:["La méduse-boîte","Le cobra royal","La veuve noire","Le scorpion jaune"]},
+{q:"Quelle est la plus longue rivière souterraine du monde ?",a:"Une rivière au Mexique (Sac Actun)",qt:"What is the longest underground river in the world?",at:"A river in Mexico (Sac Actun)",diff:"difficile",c:["Sac Actun (Mexique)","Río Secreto","Hang Sơn Đoòng","Le Nil souterrain"]},
+],
+expressions:[
+{q:"Complétez : 'Qui vole un œuf...'",a:"...vole un bœuf",qt:"Complete: 'He who steals an egg...'",at:"...steals an ox",diff:"facile",c:["...vole un bœuf","...va en prison","...perd tout","...fait une omelette"]},
+{q:"Complétez : 'Mieux vaut tard que...'",a:"...jamais",qt:"Complete: 'Better late than...'",at:"...never",diff:"facile",c:["...jamais","...tôt","...bien","...prévu"]},
+{q:"Complétez : 'Il ne faut pas vendre la peau de l'ours...'",a:"...avant de l'avoir tué",qt:"Complete: 'You shouldn't sell the bear's skin...'",at:"...before killing it",diff:"facile",c:["...avant de l'avoir tué","...au marché","...sans filet","...en plein hiver"]},
+{q:"Que signifie 'Avoir le cafard' ?",a:"Être triste, déprimé",qt:"What does 'To have the cockroach' mean?",at:"To be sad, depressed",diff:"facile",c:["Être triste, déprimé","Avoir faim","Être en colère","Avoir peur"]},
+{q:"Que signifie 'Poser un lapin à quelqu'un' ?",a:"Ne pas se présenter à un rendez-vous",qt:"What does 'To stand someone up' mean?",at:"To not show up for a date",diff:"facile",c:["Ne pas se présenter à un rendez-vous","Offrir un cadeau","Mentir","Arriver en retard"]},
+{q:"Complétez : 'Après la pluie...'",a:"...le beau temps",qt:"Complete: 'After the rain...'",at:"...comes the good weather",diff:"facile",c:["...le beau temps","...la neige","...le soleil","...le vent"]},
+{q:"Complétez : 'L'appétit vient...'",a:"...en mangeant",qt:"Complete: 'Appetite comes...'",at:"...with eating",diff:"facile",c:["...en mangeant","...en cuisinant","...avec l'heure","...du ventre"]},
+{q:"Que signifie 'Avoir d'autres chats à fouetter' ?",a:"Avoir des choses plus importantes à faire",qt:"What does 'To have other cats to whip' mean?",at:"To have more important things to do",diff:"moyen",c:["Avoir des choses plus importantes à faire","Être très occupé","Collectionner les animaux","Aimer les chats"]},
+{q:"Complétez : 'Pierre qui roule...'",a:"...n'amasse pas mousse",qt:"Complete: 'A rolling stone...'",at:"...gathers no moss",diff:"moyen",c:["...n'amasse pas mousse","...ramasse les pierres","...fait du bruit","...avance vite"]},
+{q:"Que signifie 'Se lever du pied gauche' ?",a:"Être de mauvaise humeur dès le matin",qt:"What does 'To get up on the wrong foot' mean?",at:"To be in a bad mood from the morning",diff:"moyen",c:["Être de mauvaise humeur dès le matin","Avoir la jambe gauche blessée","Se réveiller très tôt","Commencer mal sa journée de travail"]},
+{q:"Que signifie 'Tomber dans les pommes' ?",a:"S'évanouir",qt:"What does 'To fall into the apples' mean?",at:"To faint",diff:"moyen",c:["S'évanouir","Faire une chute","Manger trop de fruits","Perdre son chemin"]},
+{q:"Complétez : 'La nuit, tous les chats...'",a:"...sont gris",qt:"Complete: 'At night, all cats are...'",at:"...grey",diff:"moyen",c:["...sont gris","...chassent","...dorment","...s'enfuient"]},
+{q:"Que signifie 'Casser du sucre sur le dos de quelqu'un' ?",a:"Dire du mal de quelqu'un en son absence",qt:"What does 'To break sugar on someone's back' mean?",at:"To badmouth someone behind their back",diff:"moyen",c:["Dire du mal de quelqu'un en son absence","Critiquer ouvertement","Faire un compliment","Parler dans son dos gentiment"]},
+{q:"Que signifie 'Avoir les yeux plus grands que le ventre' ?",a:"Vouloir plus que ce que l'on peut consommer",qt:"What does 'To have eyes bigger than your stomach' mean?",at:"To want more than you can actually eat",diff:"moyen",c:["Vouloir plus que ce que l'on peut consommer","Avoir un grand appétit","Avoir de gros yeux","Être gourmand et élégant"]},
+{q:"Complétez : 'On ne fait pas d'omelette...'",a:"...sans casser des œufs",qt:"Complete: 'You can't make an omelette...'",at:"...without breaking eggs",diff:"moyen",c:["...sans casser des œufs","...sans beurre","...sans poêle","...sans feu"]},
+{q:"Que signifie 'Jeter de la poudre aux yeux' ?",a:"Chercher à impressionner par de fausses apparences",qt:"What does 'To throw powder in the eyes' mean?",at:"To try to impress with false appearances",diff:"difficile",c:["Chercher à impressionner par de fausses apparences","Voir trouble","Blesser quelqu'un","Maquiller la vérité"]},
+{q:"Que signifie 'Mettre son grain de sel' ?",a:"S'immiscer dans une conversation sans y être invité",qt:"What does 'To put in your grain of salt' mean?",at:"To meddle in a conversation uninvited",diff:"difficile",c:["S'immiscer dans une conversation","Assaisonner un plat","Ajouter une touche personnelle","Saler son opinion"]},
+{q:"Que signifie 'Tirer les marrons du feu' ?",a:"Faire le travail difficile dont quelqu'un d'autre profite",qt:"What does 'To pull the chestnuts out of the fire' mean?",at:"To do the hard work that benefits someone else",diff:"difficile",c:["Faire le travail difficile dont quelqu'un d'autre profite","Voler la vedette","Cuire les châtaignes","Prendre des risques inutiles"]},
+{q:"Complétez : 'Il ne faut pas confondre vitesse...'",a:"...et précipitation",qt:"Complete: 'You shouldn't confuse speed...'",at:"...with recklessness",diff:"difficile",c:["...et précipitation","...et rapidité","...et hâte","...et brusquerie"]},
+{q:"Que signifie 'Avoir le beurre et l'argent du beurre' ?",a:"Vouloir profiter d'un avantage tout en le conservant",qt:"What does 'To have the butter and the butter money' mean?",at:"To want to benefit from something while also keeping it",diff:"difficile",c:["Vouloir profiter d'un avantage tout en le conservant","Être très riche","Avoir tout ce qu'on veut dans la vie","Vendre et garder en même temps"]},
+{q:"Que signifie 'Donner sa langue au chat' ?",a:"Renoncer à deviner et demander la réponse",qt:"What does 'To give your tongue to the cat' mean?",at:"To give up guessing and ask for the answer",diff:"facile",c:["Renoncer à deviner et demander la réponse","Se taire définitivement","Mentir à quelqu'un","Faire un cadeau à un animal"]},
+{q:"Complétez : 'Petit à petit...'",a:"...l'oiseau fait son nid",qt:"Complete: 'Little by little...'",at:"...the bird builds its nest",diff:"facile",c:["...l'oiseau fait son nid","...l'enfant grandit","...le temps passe","...le chemin se fait"]},
+{q:"Que signifie 'Être au four et au moulin' ?",a:"Être sur plusieurs tâches en même temps",qt:"What does 'To be at the oven and the mill' mean?",at:"To be juggling several tasks at once",diff:"moyen",c:["Être sur plusieurs tâches en même temps","Avoir très faim","Travailler dans la restauration","Être fatigué"]},
+{q:"Que signifie 'Avoir un chat dans la gorge' ?",a:"Avoir la voix enrouée",qt:"What does 'To have a cat in the throat' mean?",at:"To have a hoarse voice",diff:"facile",c:["Avoir la voix enrouée","Avoir peur","Avoir avalé quelque chose","Ne plus pouvoir parler"]},
+{q:"Que signifie 'Filer à l'anglaise' ?",a:"Partir discrètement, sans dire au revoir",qt:"What does 'To leave English-style' mean?",at:"To leave discreetly without saying goodbye",diff:"moyen",c:["Partir discrètement, sans dire au revoir","Voyager en Angleterre","Parler anglais couramment","Se dépêcher"]},
+{q:"Complétez : 'Chat échaudé craint...'",a:"...l'eau froide",qt:"Complete: 'A scalded cat fears...'",at:"...cold water",diff:"moyen",c:["...l'eau froide","...le feu","...les chiens","...la pluie"]},
+],
+marques:[
+{q:"Quelle marque possède le logo à la pomme croquée ?",a:"Apple",qt:"Which brand has a bitten apple as its logo?",at:"Apple",diff:"facile",c:["Apple","Blackberry","HTC","Samsung"]},
+{q:"Quel est le slogan de Nike ?",a:"Just Do It",qt:"What is Nike's slogan?",at:"Just Do It",diff:"facile",c:["Just Do It","Impossible is Nothing","Think Different","I'm Lovin' It"]},
+{q:"Quelle marque de voiture a un logo avec 4 anneaux entrelacés ?",a:"Audi",qt:"Which car brand has a logo with 4 interlocking rings?",at:"Audi",diff:"facile",c:["Audi","Volkswagen","BMW","Mercedes"]},
+{q:"Quelle marque de fast-food a des arches dorées en M ?",a:"McDonald's",qt:"Which fast-food brand has golden arches in an M shape?",at:"McDonald's",diff:"facile",c:["McDonald's","Burger King","Subway","KFC"]},
+{q:"Quel est le slogan de L'Oréal ?",a:"Parce que je le vaux bien",qt:"What is L'Oréal's slogan?",at:"Because I'm worth it",diff:"facile",c:["Parce que je le vaux bien","Peut-être","Toujours plus belle","La beauté sans limite"]},
+{q:"Quelle marque de sport a un logo en forme de virgule (swoosh) ?",a:"Nike",qt:"Which sports brand has a swoosh-shaped logo?",at:"Nike",diff:"facile",c:["Nike","Adidas","Puma","Reebok"]},
+{q:"Quelle marque dit 'Red Bull vous donne des ailes' ?",a:"Red Bull",qt:"Which brand says 'Red Bull gives you wings'?",at:"Red Bull",diff:"facile",c:["Red Bull","Monster","Burn","Rockstar"]},
+{q:"Quel constructeur automobile a un logo avec un cheval cabré jaune ?",a:"Ferrari",qt:"Which car manufacturer has a logo with a rearing yellow horse?",at:"Ferrari",diff:"facile",c:["Ferrari","Lamborghini","Porsche","Maserati"]},
+{q:"Quelle marque de luxe française a les initiales LV sur ses sacs ?",a:"Louis Vuitton",qt:"Which French luxury brand has the initials LV on its bags?",at:"Louis Vuitton",diff:"facile",c:["Louis Vuitton","Lacoste Versace","Loewe Valentino","Longchamp Versace"]},
+{q:"Quel constructeur auto a un logo avec un lion rampant ?",a:"Peugeot",qt:"Which car manufacturer has a logo with a rampant lion?",at:"Peugeot",diff:"facile",c:["Peugeot","Renault","Fiat","Citroën"]},
+{q:"Quel est le slogan historique d'Apple ?",a:"Think Different",qt:"What is Apple's historic slogan?",at:"Think Different",diff:"moyen",c:["Think Different","Just Do It","Impossible is Nothing","Innovation"]},
+{q:"Quel est le vrai nom complet de BMW ?",a:"Bayerische Motoren Werke",qt:"What is the full name of BMW?",at:"Bayerische Motoren Werke",diff:"moyen",c:["Bayerische Motoren Werke","Berlin Motor Works","Bavaria Motor Wheels","British Motor Workshop"]},
+{q:"Quel est le vrai nom complet de KFC ?",a:"Kentucky Fried Chicken",qt:"What is the full name of KFC?",at:"Kentucky Fried Chicken",diff:"moyen",c:["Kentucky Fried Chicken","Kansas Fried Chicken","Kentucky Fresh Chicken","Kitchen Fresh Chicken"]},
+{q:"Quelle marque dit 'Impossible is Nothing' ?",a:"Adidas",qt:"Which brand says 'Impossible is Nothing'?",at:"Adidas",diff:"moyen",c:["Adidas","Nike","Puma","Under Armour"]},
+{q:"Quel est le logo de Lamborghini ?",a:"Un taureau",qt:"What is Lamborghini's logo?",at:"A bull",diff:"moyen",c:["Un taureau","Un cheval","Un aigle","Un serpent"]},
+{q:"Quelle marque automobile utilise 'The Ultimate Driving Machine' comme slogan ?",a:"BMW",qt:"Which car brand uses 'The Ultimate Driving Machine' as its slogan?",at:"BMW",diff:"moyen",c:["BMW","Mercedes","Audi","Porsche"]},
+{q:"En quelle année Nike a-t-il été fondé (sous le nom Blue Ribbon Sports) ?",a:"1964",qt:"In which year was Nike founded (under the name Blue Ribbon Sports)?",at:"1964",diff:"difficile",c:["1964","1972","1968","1960"]},
+{q:"Quelle marque française de cosmétiques a été fondée par Eugène Schueller en 1909 ?",a:"L'Oréal",qt:"Which French cosmetics brand was founded by Eugène Schueller in 1909?",at:"L'Oréal",diff:"difficile",c:["L'Oréal","Lancôme","Givenchy","Chanel"]},
+{q:"Quel est le slogan de Pringles ?",a:"Once you pop, you can't stop",qt:"What is Pringles' slogan?",at:"Once you pop, you can't stop",diff:"difficile",c:["Once you pop, you can't stop","The taste that keeps you going","Crispy every time","Pop for more"]},
+{q:"Quelle banque française a pour logo un carré rouge avec une diagonale blanche ?",a:"Société Générale",qt:"Which French bank has a red square with a white diagonal as its logo?",at:"Société Générale",diff:"difficile",c:["Société Générale","BNP Paribas","Crédit Agricole","LCL"]},
+{q:"Quelle marque de boisson gazeuse a un logo rouge avec une écriture cursive blanche ?",a:"Coca-Cola",qt:"Which soda brand has a red logo with white cursive writing?",at:"Coca-Cola",diff:"facile",c:["Coca-Cola","Pepsi","Dr Pepper","Fanta"]},
+{q:"Quelle marque allemande de sport a 3 bandes comme logo ?",a:"Adidas",qt:"Which German sports brand has 3 stripes as its logo?",at:"Adidas",diff:"facile",c:["Adidas","Puma","Nike","Reebok"]},
+{q:"Quel est le slogan d'Haribo ?",a:"Haribo c'est beau la vie",qt:"What is Haribo's slogan?",at:"Haribo, life is beautiful (Haribo c'est beau la vie)",diff:"moyen",c:["Haribo c'est beau la vie","Le bonbon qui fait sourire","La gourmandise au naturel","Toujours plus de saveurs"]},
+{q:"Quelle marque a pour logo un crocodile vert ?",a:"Lacoste",qt:"Which brand has a green crocodile as its logo?",at:"Lacoste",diff:"facile",c:["Lacoste","Ralph Lauren","Hermès","Burberry"]},
+{q:"Quelle marque automobile japonaise a pour slogan 'Drive your dreams' ?",a:"Toyota",qt:"Which Japanese car brand has the slogan 'Drive your dreams'?",at:"Toyota",diff:"moyen",c:["Toyota","Honda","Nissan","Mazda"]},
+{q:"Quelle marque de chocolat a pour slogan 'Y'a bon' historiquement ?",a:"Banania",qt:"Which chocolate brand historically used the slogan 'Y'a bon'?",at:"Banania",diff:"difficile",c:["Banania","Nestlé","Milka","Suchard"]},
+],
+internet:[
+{q:"Que signifie 'DM' sur les réseaux sociaux ?",a:"Direct Message (message privé)",qt:"What does 'DM' mean on social media?",at:"Direct Message",diff:"facile",c:["Direct Message","Daily Message","Digital Mail","Direct Mode"]},
+{q:"Quel réseau social appartient à Meta ?",a:"Facebook, Instagram, WhatsApp",qt:"Which social networks belong to Meta?",at:"Facebook, Instagram, WhatsApp",diff:"facile",c:["Facebook, Instagram, WhatsApp","Twitter, TikTok, Snapchat","YouTube, Gmail, Google+","LinkedIn, Pinterest, Reddit"]},
+{q:"Que signifie 'LOL' ?",a:"Laughing Out Loud",qt:"What does 'LOL' mean?",at:"Laughing Out Loud",diff:"facile",c:["Laughing Out Loud","Lots of Love","Lean On Life","Leave Online Later"]},
+{q:"Quel moteur de recherche est le plus utilisé dans le monde ?",a:"Google",qt:"Which search engine is the most used in the world?",at:"Google",diff:"facile",c:["Google","Bing","Yahoo","DuckDuckGo"]},
+{q:"Qu'est-ce qu'un hashtag (#) sur les réseaux sociaux ?",a:"Un mot-clé pour catégoriser le contenu",qt:"What is a hashtag (#) on social media?",at:"A keyword used to categorize content",diff:"facile",c:["Un mot-clé pour catégoriser le contenu","Un symbole musical","Une balise de chiffrement","Une commande informatique"]},
+{q:"Quelle application est connue pour ses courtes vidéos musicales ?",a:"TikTok",qt:"Which app is known for its short music videos?",at:"TikTok",diff:"facile",c:["TikTok","Instagram","YouTube Shorts","Snapchat"]},
+{q:"Que signifie 'IRL' sur internet ?",a:"In Real Life (dans la vraie vie)",qt:"What does 'IRL' mean online?",at:"In Real Life",diff:"facile",c:["In Real Life","Internet Relay Live","In Remote Location","Instantly Reacting Live"]},
+{q:"Quel réseau social est principalement utilisé pour les professionnels ?",a:"LinkedIn",qt:"Which social network is mainly used by professionals?",at:"LinkedIn",diff:"facile",c:["LinkedIn","Twitter","Facebook","Pinterest"]},
+{q:"Que signifie 'FOMO' en culture internet ?",a:"Fear Of Missing Out",qt:"What does 'FOMO' mean in internet culture?",at:"Fear Of Missing Out",diff:"moyen",c:["Fear Of Missing Out","Feeling Of More Options","Focus On My Output","Following Only Major Ones"]},
+{q:"En quelle année YouTube a-t-il été créé ?",a:"2005",qt:"In which year was YouTube created?",at:"2005",diff:"moyen",c:["2005","2006","2004","2007"]},
+{q:"En quelle année Instagram a-t-il été racheté par Facebook ?",a:"2012",qt:"In which year was Instagram bought by Facebook?",at:"2012",diff:"moyen",c:["2012","2014","2010","2016"]},
+{q:"Quelle est la différence entre HTTP et HTTPS ?",a:"S = Secure (connexion chiffrée)",qt:"What's the difference between HTTP and HTTPS?",at:"S = Secure (encrypted connection)",diff:"moyen",c:["S = Secure","S = Server","S = Standard","S = Stream"]},
+{q:"Que signifie 'SEO' en marketing digital ?",a:"Search Engine Optimization",qt:"What does 'SEO' mean in digital marketing?",at:"Search Engine Optimization",diff:"moyen",c:["Search Engine Optimization","Social Engagement Online","Systematic Email Output","Sales Engine Operations"]},
+{q:"Qui a inventé le World Wide Web (WWW) ?",a:"Tim Berners-Lee",qt:"Who invented the World Wide Web (WWW)?",at:"Tim Berners-Lee",diff:"moyen",c:["Tim Berners-Lee","Bill Gates","Steve Jobs","Vint Cerf"],e:"Tim Berners-Lee l'a inventé en 1989 au CERN."},
+{q:"Qu'est-ce que le 'phishing' ?",a:"Fraude par usurpation d'identité numérique",qt:"What is 'phishing'?",at:"Online identity theft fraud",diff:"moyen",c:["Fraude par usurpation d'identité numérique","Un type de virus","Un réseau social","Une technique de hacking légal"]},
+{q:"En quelle année Twitter (X) a-t-il été fondé ?",a:"2006",qt:"In which year was Twitter (X) founded?",at:"2006",diff:"moyen",c:["2006","2004","2008","2010"]},
+{q:"Que signifie 'NFT' ?",a:"Non-Fungible Token",qt:"What does 'NFT' mean?",at:"Non-Fungible Token",diff:"difficile",c:["Non-Fungible Token","New Financial Technology","Network File Transfer","No Fee Transaction"]},
+{q:"Quelle est la différence entre internet et le web ?",a:"Internet = réseau physique, Web = service sur internet",qt:"What's the difference between the internet and the web?",at:"Internet = physical network, Web = a service running on the internet",diff:"difficile",c:["Internet = réseau physique, Web = service sur internet","Ce sont des synonymes","Web est plus ancien qu'internet","Internet est réservé aux professionnels"]},
+{q:"En quelle année Steve Jobs a-t-il présenté le premier iPhone ?",a:"2007",qt:"In which year did Steve Jobs unveil the first iPhone?",at:"2007",diff:"difficile",c:["2007","2005","2009","2006"]},
+{q:"Qu'est-ce que l'open source ?",a:"Logiciel dont le code est accessible et modifiable par tous",qt:"What is open source?",at:"Software whose code is accessible and modifiable by everyone",diff:"difficile",c:["Logiciel dont le code est accessible et modifiable par tous","Un logiciel gratuit","Un logiciel sans abonnement","Un logiciel en ligne"]},
+{q:"Quelle entreprise a créé ChatGPT ?",a:"OpenAI",qt:"Which company created ChatGPT?",at:"OpenAI",diff:"facile",c:["OpenAI","Google","Meta","Microsoft"]},
+{q:"Que signifie l'abréviation 'PDF' ?",a:"Portable Document Format",qt:"What does the abbreviation 'PDF' stand for?",at:"Portable Document Format",diff:"moyen",c:["Portable Document Format","Personal Data File","Printable Document Form","Public Domain File"]},
+{q:"Quel réseau social est représenté par un petit oiseau bleu (avant le rebranding X) ?",a:"Twitter",qt:"Which social network is represented by a small blue bird (before the X rebrand)?",at:"Twitter",diff:"facile",c:["Twitter","Telegram","Bluesky","Mastodon"]},
+{q:"Que signifie 'wifi' ?",a:"Ce n'est pas un acronyme officiel, juste un nom de marque",qt:"What does 'wifi' stand for?",at:"It's not an official acronym, just a brand name",diff:"difficile",c:["Ce n'est pas un acronyme officiel","Wireless Fidelity","Wide Internet Frequency","World Internet Format"],e:"Contrairement à la croyance populaire, WiFi n'est pas l'acronyme de 'Wireless Fidelity', c'est un nom commercial inventé."},
+{q:"Quelle entreprise a créé le moteur de recherche Google ?",a:"Larry Page et Sergey Brin",qt:"Which company created the Google search engine?",at:"Larry Page and Sergey Brin",diff:"moyen",c:["Larry Page et Sergey Brin","Bill Gates","Mark Zuckerberg","Jeff Bezos"]},
+{q:"Que signifie l'acronyme 'URL' ?",a:"Uniform Resource Locator",qt:"What does the acronym 'URL' stand for?",at:"Uniform Resource Locator",diff:"difficile",c:["Uniform Resource Locator","Universal Reference Link","User Resource Location","Unified Remote Link"]},
+{q:"Quelle application de messagerie a été créée par Jan Koum et Brian Acton ?",a:"WhatsApp",qt:"Which messaging app was created by Jan Koum and Brian Acton?",at:"WhatsApp",diff:"moyen",c:["WhatsApp","Telegram","Signal","Viber"]},
+{q:"Que signifie 'AFK' utilisé dans les jeux en ligne ?",a:"Away From Keyboard",qt:"What does 'AFK' mean in online games?",at:"Away From Keyboard",diff:"facile",c:["Away From Keyboard","All For Knowledge","Asking For Kindness","Always For Kicks"]},
+{q:"Quel est le nom du navigateur web développé par Google ?",a:"Chrome",qt:"What is the name of the web browser developed by Google?",at:"Chrome",diff:"facile",c:["Chrome","Edge","Safari","Firefox"]},
+{q:"Que signifie 'GIF' ?",a:"Graphics Interchange Format",qt:"What does 'GIF' stand for?",at:"Graphics Interchange Format",diff:"difficile",c:["Graphics Interchange Format","Generic Image File","Global Internet Format","Graphic Image Format"]},
+{q:"Quel réseau social est dédié au partage d'images et d'idées sous forme de tableaux ?",a:"Pinterest",qt:"Which social network is dedicated to sharing images and ideas on boards?",at:"Pinterest",diff:"moyen",c:["Pinterest","Instagram","Tumblr","Flickr"]},
+],
+nostalgie:[
+{q:"Quel logiciel de messagerie instantanée était très populaire dans les années 2000 ?",a:"MSN Messenger",qt:"Which instant messaging software was very popular in the 2000s?",at:"MSN Messenger",diff:"facile",c:["MSN Messenger","WhatsApp","Skype","ICQ"]},
+{q:"Qui chantait 'Hit me Baby One More Time' (1998) ?",a:"Britney Spears",qt:"Who sang 'Hit Me Baby One More Time' (1998)?",at:"Britney Spears",diff:"facile",c:["Britney Spears","Christina Aguilera","Destiny's Child","Backstreet Boys"]},
+{q:"Quel groupe de filles britanniques chantait 'Wannabe' (1996) ?",a:"Spice Girls",qt:"Which British girl group sang 'Wannabe' (1996)?",at:"Spice Girls",diff:"facile",c:["Spice Girls","Destiny's Child","TLC","En Vogue"]},
+{q:"Quel film d'animation Disney est sorti en 1994 ?",a:"Le Roi Lion",qt:"Which Disney animated film was released in 1994?",at:"The Lion King",diff:"facile",c:["Le Roi Lion","Aladdin","Pocahontas","Mulan"]},
+{q:"Quelle émission de télé-réalité française a débuté en 2001 ?",a:"Loft Story",qt:"Which French reality TV show started in 2001?",at:"Loft Story",diff:"facile",c:["Loft Story","Star Academy","Koh-Lanta","L'Amour est dans le pré"]},
+{q:"Quelle console SEGA était la concurrente de la Super Nintendo ?",a:"Mega Drive (Genesis)",qt:"Which SEGA console rivaled the Super Nintendo?",at:"Mega Drive (Genesis)",diff:"facile",c:["Mega Drive","Game Gear","Saturn","Dreamcast"]},
+{q:"Qui chantait 'Livin' la Vida Loca' (1999) ?",a:"Ricky Martin",qt:"Who sang 'Livin' la Vida Loca' (1999)?",at:"Ricky Martin",diff:"facile",c:["Ricky Martin","Enrique Iglesias","Marc Anthony","Jon Secada"]},
+{q:"Quel téléphone portable était le plus populaire avant le smartphone ?",a:"Nokia 3310",qt:"Which mobile phone was the most popular before smartphones?",at:"Nokia 3310",diff:"facile",c:["Nokia 3310","Motorola Razr","Sony Ericsson","Siemens A50"]},
+{q:"Quelle chanson des Backstreet Boys a été un tube planétaire en 1999 ?",a:"I Want It That Way",qt:"Which Backstreet Boys song was a global hit in 1999?",at:"I Want It That Way",diff:"facile",c:["I Want It That Way","Everybody","As Long As You Love Me","Larger Than Life"]},
+{q:"En quelle année les Tamagotchi ont-ils été commercialisés (Japon) ?",a:"1996",qt:"In which year were Tamagotchis released (Japan)?",at:"1996",diff:"moyen",c:["1996","1998","1994","2000"]},
+{q:"En quelle année le film Titanic est-il sorti au cinéma ?",a:"1997",qt:"In which year was the film Titanic released in theaters?",at:"1997",diff:"moyen",c:["1997","1998","1996","1999"]},
+{q:"Quelle émission de jeu permettait de gagner un million (début 2000) ?",a:"Qui veut gagner des millions ?",qt:"Which game show let you win a million (early 2000s)?",at:"Who Wants to Be a Millionaire?",diff:"moyen",c:["Qui veut gagner des millions ?","Fort Boyard","La Roue de la fortune","Questions pour un champion"]},
+{q:"Quel réseau social est apparu avant Facebook (2003) ?",a:"MySpace",qt:"Which social network appeared before Facebook (2003)?",at:"MySpace",diff:"moyen",c:["MySpace","Friendster","Hi5","Bebo"]},
+{q:"Quelle console portable Nintendo a lancé Pokémon en Europe ?",a:"Game Boy",qt:"Which Nintendo handheld console launched Pokémon in Europe?",at:"Game Boy",diff:"moyen",c:["Game Boy","Game Boy Color","Game Boy Advance","Nintendo DS"]},
+{q:"Quelle série de dessin animé mettait en scène un petit hamster jaune ?",a:"Hamtaro",qt:"Which cartoon series featured a little yellow hamster?",at:"Hamtaro",diff:"moyen",c:["Hamtaro","Pikachu Show","Hammy","Chip 'n Dale"]},
+{q:"Quel logiciel de création de musique était populaire dans les années 2000 ?",a:"FruityLoops (FL Studio)",qt:"Which music creation software was popular in the 2000s?",at:"FruityLoops (FL Studio)",diff:"moyen",c:["FruityLoops (FL Studio)","GarageBand","Pro Tools","Audacity"]},
+{q:"Quel service internet distribuait des CD par courrier dans les années 90 ?",a:"AOL",qt:"Which internet service mailed out CDs in the 90s?",at:"AOL",diff:"difficile",c:["AOL","CompuServe","Prodigy","The Source"]},
+{q:"En quelle année la Playstation 1 est-elle sortie en Europe ?",a:"1995",qt:"In which year was the PlayStation 1 released in Europe?",at:"1995",diff:"difficile",c:["1995","1996","1994","1997"]},
+{q:"Quel groupe de rap français a marqué les années 90 avec l'album 'Ma philosophie' ?",a:"Alliance Ethnik",qt:"Which French rap group marked the 90s with the album 'Ma Philosophie'?",at:"Alliance Ethnik",diff:"difficile",c:["Alliance Ethnik","IAM","NTM","MC Solaar"]},
+{q:"Quelle émission TV des années 90 mettait en scène des cascadeurs face à des défis sportifs ?",a:"Intervilles",qt:"Which 90s TV show featured stuntmen facing sports challenges?",at:"Intervilles",diff:"difficile",c:["Intervilles","Les Guignols","Benny Hill","Jeux sans frontières"]},
+{q:"Quel film a popularisé la phrase 'Que la force soit avec toi' en 1977 ?",a:"Star Wars",qt:"Which film popularized the phrase 'May the Force be with you' in 1977?",at:"Star Wars",diff:"facile",c:["Star Wars","Star Trek","Le Cinquième Élément","Flash Gordon"]},
+{q:"Quel jouet en plastique avec des yeux globuleux est devenu culte dans les années 2000 ?",a:"Bratz ou Tamagotchi",qt:"Which plastic toy with big eyes became a cult item in the 2000s?",at:"Bratz or Tamagotchi",diff:"moyen",c:["Tamagotchi","Furby","Polly Pocket","Beyblade"]},
+{q:"Quelle marque de baladeur MP3 a dominé le marché dans les années 2000 ?",a:"iPod (Apple)",qt:"Which MP3 player brand dominated the market in the 2000s?",at:"iPod (Apple)",diff:"facile",c:["iPod (Apple)","Walkman (Sony)","Zune (Microsoft)","Discman"]},
+{q:"Quel jeu vidéo avec des blocs colorés qui tombent est sorti en 1984 ?",a:"Tetris",qt:"Which falling-block video game came out in 1984?",at:"Tetris",diff:"facile",c:["Tetris","Pac-Man","Snake","Space Invaders"]},
+{q:"Quel film culte des années 80 met en scène une voiture qui voyage dans le temps ?",a:"Retour vers le Futur",qt:"Which cult 80s film features a car that travels through time?",at:"Back to the Future",diff:"facile",c:["Retour vers le Futur","E.T.","Les Goonies","Gremlins"]},
+{q:"Quelle chaîne musicale a marqué les années 90-2000 en France ?",a:"MTV ou M6",qt:"Which music channel marked the 90s-2000s in France?",at:"MTV or M6",diff:"moyen",c:["MTV","M6","NRJ12","W9"]},
+]
+};
+let teams=[],progress={},shuffled={},activeCats=[],curCat=null,curQ=null,timerID=null,timeLeft=30,totalAnswered=0,selectedDiff='all',qcmMode=false;
+const CIRC=2*Math.PI*44;
+
+/* ---- SETUP ---- */
+document.getElementById('team-input').addEventListener('keydown',e=>{if(e.key==='Enter')addTeam()});
+
+function initCatCheckboxes(){
+  const box=document.getElementById('cats-checkboxes');
+  box.innerHTML=Object.keys(CM).map(k=>{
+    const c=CM[k];
+    return`<div class="cat-check selected" data-cat="${k}" style="border-color:${c.color}" onclick="toggleCat(this,'${k}')"><span>${c.icon}</span><span>${c.name}</span></div>`;
+  }).join('');
+  activeCats=Object.keys(CM);
+}
+
+function toggleCat(el,cat){
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected')){
+    if(!activeCats.includes(cat))activeCats.push(cat);
+    el.style.borderColor=CM[cat].color;
+  } else {
+    activeCats=activeCats.filter(c=>c!==cat);
+    el.style.borderColor='transparent';
+  }
+  validateStart();
+}
+
+function selectAllCats(v){
+  document.querySelectorAll('.cat-check').forEach(el=>{
+    const cat=el.dataset.cat;
+    if(v){el.classList.add('selected');el.style.borderColor=CM[cat].color;}
+    else{el.classList.remove('selected');el.style.borderColor='transparent';}
+  });
+  activeCats=v?Object.keys(CM):[];
+  validateStart();
+}
+
+function setDiff(btn){
+  document.querySelectorAll('.diff-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedDiff=btn.dataset.diff;
+}
+
+function addTeam(){
+  const inp=document.getElementById('team-input');
+  const name=inp.value.trim();
+  if(!name||teams.length>=8)return;
+  teams.push({name,score:0,color:TC[teams.length%TC.length]});
+  inp.value='';inp.focus();
+  renderSetupTeams();validateStart();
+}
+
+function removeTeam(i){
+  teams.splice(i,1);
+  teams.forEach((t,j)=>t.color=TC[j%TC.length]);
+  renderSetupTeams();validateStart();
+}
+
+function validateStart(){
+  const hasCats=activeCats.length>0;
+  const hasQs=activeCats.some(cat=>{
+    const qs=selectedDiff==='all'?Q[cat]:Q[cat].filter(q=>q.diff===selectedDiff);
+    return qs&&qs.length>0;
+  });
+  document.getElementById('btn-start').disabled=teams.length<2||!hasCats||!hasQs;
+}
+
+function renderSetupTeams(){
+  const list=document.getElementById('teams-list');
+  list.innerHTML=teams.map((t,i)=>`
+    <li class="team-item">
+      <div class="team-item-left"><span class="team-dot" style="background:${t.color}"></span><span class="team-name">${esc(t.name)}</span></div>
+      <button class="btn-remove" onclick="removeTeam(${i})">✕</button>
+    </li>`).join('');
+  const h=document.getElementById('count-hint');
+  h.textContent=teams.length===0?'2 équipes minimum · 8 maximum':teams.length===1?`1 équipe ajoutée — encore une !`:`${teams.length} équipes`;
+}
+
+function startGame(){
+  const cats=activeCats.filter(cat=>{
+    const qs=selectedDiff==='all'?Q[cat]:(Q[cat]||[]).filter(q=>q.diff===selectedDiff);
+    return qs&&qs.length>0;
+  });
+  cats.forEach(cat=>{
+    const qs=selectedDiff==='all'?[...Q[cat]]:[...Q[cat]].filter(q=>q.diff===selectedDiff);
+    shuffled[cat]=shuffle(qs);
+    progress[cat]=0;
+  });
+  activeCats=cats;
+  totalAnswered=0;
+  adjReset();
+  show('s-cats');
+  renderCats();
+}
+
+/* ---- CATEGORIES ---- */
+function renderCats(){
+  document.getElementById('scoreboard').innerHTML=teams.map(t=>`
+    <div class="score-pill">
+      <span class="s-dot" style="background:${t.color}"></span>
+      <span class="s-name">${esc(t.name)}</span>
+      <span class="s-score">${t.score}</span>
+    </div>`).join('');
+
+  const grid=document.getElementById('categories-grid');
+  grid.innerHTML=activeCats.map(cat=>{
+    const rem=(shuffled[cat]||[]).length-(progress[cat]||0);
+    const c=CM[cat];
+    return`<button class="cat-btn cat-${cat}" onclick="selectCat('${cat}')" ${rem===0?'disabled':''}>
+      <span class="cat-icon">${c.icon}</span>
+      <span class="cat-name">${c.name}</span>
+      <span class="cat-remaining">${rem>0?rem+' question'+(rem>1?'s':''):'✓ Terminé'}</span>
+    </button>`;
+  }).join('');
+
+  const total=activeCats.reduce((s,cat)=>(shuffled[cat]||[]).length+s,0);
+  document.getElementById('round-info').textContent=`${totalAnswered} / ${total} questions jouées`;
+}
+
+function selectCat(cat){
+  curCat=cat;
+  curQ=shuffled[cat][progress[cat]];
+  const c=CM[cat];
+  const total=activeCats.reduce((s,k)=>(shuffled[k]||[]).length+s,0);
+  const qNum=totalAnswered+1;
+
+  setBadge('q-badge',c);
+  const db=document.getElementById('q-diff-badge');
+  const dmap={facile:'🟢 Facile',moyen:'🟡 Moyen',difficile:'🔴 Difficile'};
+  db.textContent=dmap[curQ.diff]||'';
+  db.className='diff-badge '+(curQ.diff||'');
+
+  document.getElementById('q-num').textContent=`Question ${qNum} / ${total}`;
+  document.getElementById('q-text').textContent=curQ.q;
+  document.getElementById('q-translation').textContent=curQ.qt||'';
+
+  const revBtn=document.getElementById('btn-reveal');
+  revBtn.style.background=`linear-gradient(135deg,${c.color},${c.color}88)`;
+  revBtn.style.boxShadow=`0 8px 25px ${c.color}55`;
+
+  // QCM choices
+  const cg=document.getElementById('choices-grid');
+  if(qcmMode&&curQ.c&&curQ.c.length>0){
+    const shuffledC=shuffle([...curQ.c]);
+    const letters=['A','B','C','D'];
+    cg.innerHTML=shuffledC.map((ch,i)=>`
+      <button class="choice-btn">
+        <span class="choice-letter">${letters[i]}</span>
+        <span>${esc(ch)}</span>
+      </button>`).join('');
+    cg.style.display='grid';
+    if(curQ.c.length===2)cg.style.gridTemplateColumns='1fr 1fr';
+  } else {
+    cg.style.display='none';
+    cg.innerHTML='';
+  }
+
+  show('s-question');
+  startTimer(c.color);
+}
+
+/* ---- TIMER ---- */
+function startTimer(color){
+  timeLeft=30;
+  const ring=document.getElementById('t-ring');
+  const num=document.getElementById('t-num');
+  ring.style.stroke=color;
+  ring.style.strokeDasharray=CIRC;
+  ring.style.strokeDashoffset='0';
+  num.textContent=30;
+  num.style.color=color;
+  num.classList.remove('timer-urgent');
+  if(timerID)clearInterval(timerID);
+  timerID=setInterval(()=>{
+    timeLeft--;
+    num.textContent=timeLeft;
+    ring.style.strokeDashoffset=((30-timeLeft)/30)*CIRC;
+    if(timeLeft<=5){num.classList.add('timer-urgent');ring.style.stroke='#ff6b6b';beep();}
+    if(timeLeft<=0){clearInterval(timerID);revealAnswer();}
+  },1000);
+}
+
+function stopTimer(){if(timerID){clearInterval(timerID);timerID=null;}}
+
+/* ---- REVEAL ---- */
+function revealAnswer(){
+  stopTimer();
+  const c=CM[curCat];
+  setBadge('a-badge',c);
+  document.getElementById('a-q-text').textContent=curQ.q;
+
+  const ans=document.getElementById('answer-text');
+  ans.textContent=curQ.a;
+  ans.style.color=c.color;
+  ans.classList.remove('pop-in');
+  void ans.offsetWidth;
+  ans.classList.add('pop-in');
+
+  document.getElementById('answer-translation').textContent=curQ.at&&curQ.at!==curQ.a?curQ.at:'';
+  document.getElementById('answer-expl').textContent=curQ.e||'';
+
+  document.getElementById('pts-grid').innerHTML=teams.map((t,i)=>`
+    <button class="pt-btn" id="pb-${i}" onclick="award(${i})">
+      <span class="pt-dot" style="background:${t.color}"></span>
+      <span>${esc(t.name)}</span>
+      <span class="pt-score">${t.score}</span>
+    </button>`).join('');
+
+  show('s-answer');
+  confetti(c.color);
+}
+
+function award(i){
+  teams[i].score++;
+  const btn=document.getElementById('pb-'+i);
+  btn.classList.add('awarded');
+  btn.disabled=true;
+  btn.style.background=teams[i].color;
+  btn.style.borderColor=teams[i].color;
+  btn.querySelector('.pt-score').textContent=teams[i].score;
+}
+
+function next(){
+  progress[curCat]++;
+  totalAnswered++;
+  const allDone=activeCats.every(cat=>progress[cat]>=(shuffled[cat]||[]).length);
+  if(allDone){endGame();return;}
+  show('s-cats');
+  renderCats();
+}
+
+/* ---- END ---- */
+function endGame(){
+  stopTimer();
+  const sorted=[...teams].sort((a,b)=>b.score-a.score);
+  const n=sorted.length;
+  const spots=[];
+  if(n>=2)spots.push({t:sorted[1],cls:'silver',e:'🥈'});
+  spots.push({t:sorted[0],cls:'gold',e:'🥇'});
+  if(n>=3)spots.push({t:sorted[2],cls:'bronze',e:'🥉'});
+  document.getElementById('podium').innerHTML=spots.map(s=>`
+    <div class="podium-spot ${s.cls}">
+      <div class="pod-name">${esc(s.t.name)}</div>
+      <div class="pod-score">${s.t.score} pts</div>
+      <div class="pod-bar"><span class="pod-emoji">${s.e}</span></div>
+    </div>`).join('');
+  const others=sorted.slice(3);
+  document.getElementById('other-ranks').innerHTML=others.map((t,i)=>`
+    <div class="rank-row">
+      <span class="rank-pos">#${i+4}</span>
+      <span class="rank-name">${esc(t.name)}</span>
+      <span class="rank-pts">${t.score} pts</span>
+    </div>`).join('');
+  show('s-end');
+  setTimeout(()=>confetti('#ffd700'),100);
+  setTimeout(()=>confetti('#a29bfe'),600);
+  setTimeout(()=>confetti('#fd79a8'),1100);
+}
+
+function replay(){teams.forEach(t=>t.score=0);startGame();}
+function goSetup(){teams=[];renderSetupTeams();show('s-setup');}
+
+/* ---- UTILS ---- */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function setBadge(id,c){const el=document.getElementById(id);el.textContent=c.icon+' '+c.name;el.style.background=c.bg;el.style.color=c.color;el.style.borderColor=c.border;}
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function confetti(col){
+  const c=document.getElementById('conf');
+  const pal=[col,'#fff','#ffd700',col+'aa'];
+  for(let i=0;i<45;i++){
+    const p=document.createElement('div');
+    p.className='confetti-p';
+    const color=pal[Math.floor(Math.random()*pal.length)];
+    const size=6+Math.random()*9;
+    p.style.cssText=`left:${Math.random()*100}%;background:${color};width:${size}px;height:${size}px;border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.5+Math.random()}s;animation-delay:${Math.random()*.4}s;`;
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),3000);
+  }
+}
+function beep(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=880;o.type='sine';
+    g.gain.setValueAtTime(.07,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.12);
+    o.start();o.stop(ctx.currentTime+.12);
+  }catch(e){}
+}
+
+/* ---- ADMIN: GESTION MANUELLE DES SCORES ---- */
+
+/* ════════════════════════════════════════════════════════
+   AJUSTEMENT MANUEL DES SCORES — panneau intégré
+   ════════════════════════════════════════════════════════ */
+let adjTeam=null, adjPts=1, adjReason='', adjHistory=[];
+
+function toggleAdjPanel(){
+  const body=document.getElementById('score-adj-body');
+  const chev=document.getElementById('adj-chevron');
+  const open=body.classList.toggle('open');
+  chev.textContent=open?'▲':'▼';
+  if(open) adjRenderTeams();
+}
+
+function adjRenderTeams(){
+  const list=document.getElementById('adj-teams-list');
+  if(!list||!teams.length)return;
+  list.innerHTML=teams.map((t,i)=>`
+    <div class="adj-team-row${adjTeam===i?' sel':''}" style="--adj-col:${t.color}" onclick="adjPickTeam(${i})">
+      <span class="adj-dot" style="background:${t.color}"></span>
+      <span class="adj-name">${esc(t.name)}</span>
+      <span class="adj-score" style="color:${t.color}">${t.score}</span>
+    </div>`).join('');
+}
+
+function adjPickTeam(i){
+  adjTeam=i;
+  adjRenderTeams();
+  adjValidate();
+}
+
+function adjSetPts(v){
+  adjPts=Math.max(1,v);
+  const inp=document.getElementById('adj-pts');
+  if(inp) inp.value=adjPts;
+  adjValidate();
+}
+
+function adjStep(d){
+  const inp=document.getElementById('adj-pts');
+  adjPts=Math.max(1,(parseInt(inp.value,10)||1)+d);
+  inp.value=adjPts;
+  adjValidate();
+}
+
+document.getElementById('adj-pts').addEventListener('input',function(){
+  adjPts=Math.max(1,parseInt(this.value,10)||1);
+  this.value=adjPts;
+  adjValidate();
+});
+
+function adjPickReason(btn){
+  document.querySelectorAll('.adj-reason').forEach(r=>r.classList.remove('sel-pos','sel-neg'));
+  btn.classList.add(btn.dataset.t==='pos'?'sel-pos':'sel-neg');
+  adjReason=btn.dataset.r;
+  const c=document.getElementById('adj-custom');
+  if(c) c.value='';
+  adjValidate();
+}
+
+function adjCustom(v){
+  adjReason=v.trim();
+  document.querySelectorAll('.adj-reason').forEach(r=>r.classList.remove('sel-pos','sel-neg'));
+  adjValidate();
+}
+
+function adjValidate(){
+  const ok=adjTeam!==null&&teams[adjTeam]&&adjPts>0&&adjReason.trim()!=='';
+  const ba=document.getElementById('adj-btn-add');
+  const br=document.getElementById('adj-btn-rem');
+  if(ba) ba.disabled=!ok;
+  if(br) br.disabled=!ok;
+}
+
+function adjApply(sign){
+  if(adjTeam===null||!teams[adjTeam]||adjPts<1||!adjReason.trim())return;
+  const t=teams[adjTeam];
+  const prev=t.score;
+  const delta=sign*adjPts;
+  t.score=Math.max(0,t.score+delta);
+
+  adjHistory.unshift({name:t.name,color:t.color,pts:delta,from:prev,to:t.score,reason:adjReason.trim()});
+  if(adjHistory.length>10) adjHistory.pop();
+
+  adjRenderTeams();
+  adjRenderHistory();
+  renderCats(); // refresh scoreboard
+
+  // feedback
+  const fb=document.getElementById('adj-feedback');
+  fb.style.color=delta>0?'#26de81':'#ff6b6b';
+  fb.textContent=(delta>0?'+ ':'- ')+Math.abs(delta)+' pt'+(Math.abs(delta)>1?'s':'')+' · '+t.name+' ('+prev+'→'+t.score+') · '+adjReason;
+  fb.classList.add('show');
+  if(fb._t) clearTimeout(fb._t);
+  fb._t=setTimeout(()=>fb.classList.remove('show'),3000);
+
+  // reset reason
+  document.querySelectorAll('.adj-reason').forEach(r=>r.classList.remove('sel-pos','sel-neg'));
+  adjReason='';
+  const c=document.getElementById('adj-custom');
+  if(c) c.value='';
+  adjValidate();
+
+  if(delta>0) confetti(t.color);
+}
+
+function adjRenderHistory(){
+  const hist=document.getElementById('adj-hist');
+  const list=document.getElementById('adj-hist-list');
+  if(!hist||!list) return;
+  if(!adjHistory.length){hist.style.display='none';return;}
+  hist.style.display='block';
+  list.innerHTML=adjHistory.map(h=>`
+    <div class="adj-hist-row">
+      <span class="adj-hist-dot" style="background:${h.color}"></span>
+      <span class="adj-hist-name">${esc(h.name)}</span>
+      <span class="adj-hist-pts" style="color:${h.pts>0?'#26de81':'#ff6b6b'}">${h.pts>0?'+':''}${h.pts}</span>
+      <span class="adj-hist-reason">${esc(h.reason)}</span>
+      <span class="adj-hist-score">${h.from}→${h.to}</span>
+    </div>`).join('');
+}
+
+function adjReset(){adjTeam=null;adjPts=1;adjReason='';adjHistory=[];}
+
+
+// Init
+initCatCheckboxes();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const b=document.getElementById('score-adj-body');if(b&&b.classList.contains('open'))toggleAdjPanel();}});
+</script>
+</body>
+</html>
